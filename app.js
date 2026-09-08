@@ -454,7 +454,7 @@ function downloadPDF() {
   doc.setTextColor(85, 85, 95);
   const noteLines = [
     'All financial projections, cash yields, and returns shown above are estimates based on standard operating assumptions',
-    '(210 seats, occupancy, ticket pricing, and F&B spends) as per the franchise investment workbook. Actual performance may vary',
+    '(occupancy, ticket pricing, and F&B spends) as per the franchise investment workbook. Actual performance may vary',
     'based on local market conditions, seasonality, government policies, and day-to-day operational efficiencies.'
   ];
   noteLines.forEach((line, lineIdx) => {
