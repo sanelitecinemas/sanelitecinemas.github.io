@@ -225,10 +225,11 @@ function downloadPDF() {
     doc.text(card.sub, x + 3.5, cardY + 19);
   });
 
-  // Tables: Assumptions & Monthly Breakdown
-  const tableY = 60;
+  // 1. Side-by-side Tables: Assumptions & Monthly Breakdown
+  const tableY = 56;
   const colW = (contentWidth - 6) / 2;
 
+  // Left Table: Assumptions (Clean 8 balanced rows)
   doc.autoTable({
     startY: tableY,
     margin: { left: margin },
@@ -239,25 +240,22 @@ function downloadPDF() {
       ['Shows / Day (Mon-Thu / Fri-Sun)', `${d.weekdayShowsPerDay} Shows / ${d.weekendShowsPerDay} Shows`],
       ['Weekday Occupancy (Mon-Thu)', `${number('weekdayOccupancy')}%`],
       ['Weekend Occupancy (Fri-Sun)', `${number('weekendOccupancy')}%`],
-      ['Weekday Ticket Price', `Rs. ${number('weekdayRate')}`],
-      ['Weekend Ticket Price', `Rs. ${number('weekendRate')}`],
+      ['Ticket Price (Mon-Thu / Fri-Sun)', `Rs. ${number('weekdayRate')} / Rs. ${number('weekendRate')}`],
       ['F&B Spend / Booking', `Rs. ${number('foodRate')}`],
       ['Investor Profit Share', `${number('investorShare')}%`],
-      ['Monthly Shows Breakdown', `${d.totalWeekdayShows} Mon-Thu / ${d.totalWeekendShows} Fri-Sun (${d.totalShows} Total)`],
-      ['Monthly Seat Capacity', `${d.totalWeekdaySeats.toLocaleString('en-IN')} Mon-Thu / ${d.totalWeekendSeats.toLocaleString('en-IN')} Fri-Sun (${d.totalMonthlySeats.toLocaleString('en-IN')} Total)`],
-      ['Monthly Bookings (Footfall)', `${Math.round(d.weekdayBookings).toLocaleString('en-IN')} Mon-Thu / ${Math.round(d.weekendBookings).toLocaleString('en-IN')} Fri-Sun (${Math.round(d.weekdayBookings + d.weekendBookings).toLocaleString('en-IN')} Total)`]
+      ['Total Monthly Shows', `${d.totalShows} Shows (${d.totalWeekdayShows} Mon-Thu / ${d.totalWeekendShows} Fri-Sun)`]
     ],
     theme: 'plain',
     headStyles: {
       fillColor: [36, 36, 48],
       textColor: [255, 255, 255],
-      fontSize: 8,
+      fontSize: 7.5,
       fontStyle: 'bold',
-      cellPadding: 2.8
+      cellPadding: 2.5
     },
     styles: {
-      fontSize: 8,
-      cellPadding: 2.3,
+      fontSize: 7.5,
+      cellPadding: 2.1,
       lineColor: [235, 235, 240],
       lineWidth: 0.2
     },
@@ -266,7 +264,9 @@ function downloadPDF() {
       1: { halign: 'right', fontStyle: 'bold', textColor: cDark }
     }
   });
+  const leftFinalY = doc.lastAutoTable.finalY;
 
+  // Right Table: Financial Breakdown (Matching 8 balanced rows)
   doc.autoTable({
     startY: tableY,
     margin: { left: margin + colW + 6 },
@@ -286,13 +286,13 @@ function downloadPDF() {
     headStyles: {
       fillColor: [36, 36, 48],
       textColor: [255, 255, 255],
-      fontSize: 8,
+      fontSize: 7.5,
       fontStyle: 'bold',
-      cellPadding: 2.8
+      cellPadding: 2.5
     },
     styles: {
-      fontSize: 8,
-      cellPadding: 2.3,
+      fontSize: 7.5,
+      cellPadding: 2.1,
       lineColor: [235, 235, 240],
       lineWidth: 0.2
     },
@@ -312,11 +312,56 @@ function downloadPDF() {
       }
     }
   });
+  const rightFinalY = doc.lastAutoTable.finalY;
 
-  // Three-Year Trajectory Table
-  const finalY1 = doc.lastAutoTable.finalY;
-  const trajY = Math.max(finalY1, 122) + 6;
+  // 2. Full-Width Ticketing Capacity & Footfall Table
+  const capY = Math.max(leftFinalY, rightFinalY) + 5;
 
+  doc.autoTable({
+    startY: capY,
+    margin: { left: margin },
+    tableWidth: contentWidth,
+    head: [['PERIOD', 'SHOWS/DAY', 'DAYS', 'TOTAL SEATS', 'OCCUPANCY', 'BOOKINGS', 'TICKET RATE', 'TICKET REVENUE']],
+    body: [
+      ['Mon–Thu (Weekdays)', `${d.weekdayShowsPerDay}`, '18', d.totalWeekdaySeats.toLocaleString('en-IN'), `${number('weekdayOccupancy')}%`, Math.round(d.weekdayBookings).toLocaleString('en-IN'), `Rs. ${number('weekdayRate')}`, pdfCurrency(d.weekdayRevenue)],
+      ['Fri–Sun (Weekends)', `${d.weekendShowsPerDay}`, '12', d.totalWeekendSeats.toLocaleString('en-IN'), `${number('weekendOccupancy')}%`, Math.round(d.weekendBookings).toLocaleString('en-IN'), `Rs. ${number('weekendRate')}`, pdfCurrency(d.weekendRevenue)],
+      ['Total Monthly Capacity', `${d.totalShows} Shows`, '30', d.totalMonthlySeats.toLocaleString('en-IN'), '—', Math.round(d.weekdayBookings + d.weekendBookings).toLocaleString('en-IN'), '—', pdfCurrency(d.ticketIncome)]
+    ],
+    theme: 'plain',
+    headStyles: {
+      fillColor: [48, 48, 62],
+      textColor: [255, 255, 255],
+      fontSize: 7.5,
+      fontStyle: 'bold',
+      cellPadding: 2.5
+    },
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 2.2,
+      lineColor: [230, 230, 238],
+      lineWidth: 0.2
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold', textColor: [50, 50, 65] },
+      1: { halign: 'center' },
+      2: { halign: 'center' },
+      3: { halign: 'right' },
+      4: { halign: 'center' },
+      5: { halign: 'right', fontStyle: 'bold' },
+      6: { halign: 'right' },
+      7: { halign: 'right', fontStyle: 'bold', textColor: cDark }
+    },
+    didParseCell: function(data) {
+      if (data.section === 'body' && data.row.index === 2) {
+        data.cell.styles.fillColor = [245, 245, 250];
+        data.cell.styles.fontStyle = 'bold';
+      }
+    }
+  });
+  const capFinalY = doc.lastAutoTable.finalY;
+
+  // 3. Three-Year Trajectory Table
+  const trajY = capFinalY + 5;
   const depreciation = [d.investment * 0.1, d.investment * 0.09, d.investment * 0.081];
   const trajRows = [
     [
@@ -346,24 +391,24 @@ function downloadPDF() {
     startY: trajY,
     margin: { left: margin },
     tableWidth: contentWidth,
-    head: [['TIMELINE', 'INVESTOR SHARE', 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
+    head: [['TIMELINE', 'INVESTOR SHARE (8% GROWTH)', 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
     body: trajRows,
     theme: 'plain',
     headStyles: {
       fillColor: cDark,
       textColor: [255, 255, 255],
-      fontSize: 8,
+      fontSize: 7.5,
       fontStyle: 'bold',
-      cellPadding: 3
+      cellPadding: 2.5
     },
     styles: {
-      fontSize: 8,
-      cellPadding: 2.8,
+      fontSize: 7.5,
+      cellPadding: 2.2,
       lineColor: [230, 230, 238],
       lineWidth: 0.2
     },
     columnStyles: {
-      0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 },
+      0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 48 },
       1: { halign: 'right', textColor: cDark },
       2: { halign: 'right', textColor: cMuted },
       3: { halign: 'right', fontStyle: 'bold', textColor: cDark },
@@ -373,38 +418,39 @@ function downloadPDF() {
       fillColor: [249, 249, 252]
     }
   });
+  const trajFinalY = doc.lastAutoTable.finalY;
 
-  // Payback summary banner
-  const finalY2 = doc.lastAutoTable.finalY + 4;
+  // 4. Payback summary banner
+  const finalY2 = trajFinalY + 3.5;
   doc.setFillColor(243, 240, 255);
   doc.setDrawColor(223, 216, 250);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, finalY2, contentWidth, 9, 2, 2, 'FD');
+  doc.roundedRect(margin, finalY2, contentWidth, 7.5, 1.5, 1.5, 'FD');
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(85, 52, 196);
-  doc.text('Capital Recovery Timeline:', margin + 4, finalY2 + 5.8);
+  doc.text('Capital Recovery Timeline:', margin + 4, finalY2 + 5);
 
   const paybackYears = d.annualShare ? (d.investment / d.annualShare).toFixed(1) : '—';
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
-  doc.text(`Estimated Full Payback in ${paybackYears} Years (at current assumptions)`, pageWidth - margin - 4, finalY2 + 5.8, { align: 'right' });
+  doc.setFontSize(8);
+  doc.text(`Estimated Full Payback in ${paybackYears} Years (at current assumptions)`, pageWidth - margin - 4, finalY2 + 5, { align: 'right' });
 
-  // Disclaimer Note Box
-  const noteY = finalY2 + 13;
+  // 5. Disclaimer Note Box
+  const noteY = finalY2 + 10.5;
   doc.setFillColor(254, 250, 245);
   doc.setDrawColor(245, 222, 195);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, noteY, contentWidth, 16, 2, 2, 'FD');
+  doc.roundedRect(margin, noteY, contentWidth, 13, 1.5, 1.5, 'FD');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(190, 80, 25);
-  doc.text('* Note:', margin + 4, noteY + 5.5);
+  doc.text('* Note:', margin + 3.5, noteY + 4.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
+  doc.setFontSize(6.5);
   doc.setTextColor(85, 85, 95);
   const noteLines = [
     'All financial projections, cash yields, and returns shown above are estimates based on standard operating assumptions',
@@ -412,17 +458,17 @@ function downloadPDF() {
     'based on local market conditions, seasonality, government policies, and day-to-day operational efficiencies.'
   ];
   noteLines.forEach((line, lineIdx) => {
-    doc.text(line, margin + 17, noteY + 5.5 + (lineIdx * 3.8));
+    doc.text(line, margin + 14, noteY + 4.5 + (lineIdx * 3.3));
   });
 
   // Footer
-  const footerY = pageHeight - 12;
+  const footerY = pageHeight - 9;
   doc.setDrawColor(225, 225, 232);
   doc.setLineWidth(0.3);
-  doc.line(margin, footerY - 3, pageWidth - margin, footerY - 3);
+  doc.line(margin, footerY - 2.5, pageWidth - margin, footerY - 2.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
+  doc.setFontSize(6.5);
   doc.setTextColor(...cMuted);
   doc.text('Generated via Sanelite Cinemas Franchise Intelligence Engine', margin, footerY);
   doc.text('Confidential & Proprietary — For Investor Assessment Only', pageWidth - margin, footerY, { align: 'right' });
