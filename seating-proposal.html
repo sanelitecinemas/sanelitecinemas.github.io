@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101018" />
+    <title>Seating Investment Proposal — Sanelite Cinemas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      if (!sessionStorage.getItem('sanelite_auth')) {
+        window.location.replace('login.html');
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Desktop Sidebar Navigation -->
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Sanelite Cinemas home">
+          <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="brand-logo" />
+        </a>
+        <nav aria-label="Primary navigation">
+          <a class="nav-link" href="index.html">
+            <span>📊 FOCO model</span>
+          </a>
+          <a class="nav-link" href="fofo-model.html">
+            <span>🎬 FOFO model</span>
+          </a>
+          <a class="nav-link active" href="seating-proposal.html">
+            <span>💺 Seating proposal</span>
+            <span class="sidebar-nav-badge">Live</span>
+          </a>
+        </nav>
+        <div class="sidebar-note"><span class="status-dot"></span>Model synced from ROI workbook</div>
+      </aside>
+
+      <!-- Mobile App Header (Visible on mobile & tablet <= 1024px) -->
+      <header class="mobile-header">
+        <div class="mobile-header-left">
+          <button id="mobileMenuBtn" class="mobile-menu-trigger" aria-label="Open navigation menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <a class="mobile-brand" href="index.html" aria-label="Sanelite Cinemas home">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="mobile-brand-logo" />
+          </a>
+        </div>
+        <div class="mobile-header-right">
+          <button class="mobile-btn mobile-btn-export" id="mobileExportButton">
+            <span>Export</span>
+            <span aria-hidden="true">↓</span>
+          </button>
+          <button class="mobile-btn mobile-btn-logout" id="mobileLogoutButton" aria-label="Logout" title="Logout">
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Mobile Navigation Drawer Backdrop -->
+      <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+      <!-- Slide-out Mobile Navigation Drawer -->
+      <nav id="mobileDrawer" class="mobile-drawer" aria-label="Mobile navigation">
+        <div class="drawer-header">
+          <a class="drawer-brand" href="index.html">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="drawer-logo" />
+          </a>
+          <button id="closeDrawerBtn" class="drawer-close-btn" aria-label="Close navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="drawer-links">
+          <a class="drawer-link" href="index.html">
+            <span class="drawer-link-icon">📊</span>
+            <div class="drawer-link-text">
+              <strong>FOCO Model</strong>
+              <small>Company operated franchise model</small>
+            </div>
+          </a>
+          <a class="drawer-link" href="fofo-model.html">
+            <span class="drawer-link-icon">🎬</span>
+            <div class="drawer-link-text">
+              <strong>FOFO Model</strong>
+              <small>Franchisee revenue & OPEX sharing</small>
+            </div>
+          </a>
+          <a class="drawer-link active" href="seating-proposal.html">
+            <span class="drawer-link-icon">💺</span>
+            <div class="drawer-link-text">
+              <strong>Seating Proposal</strong>
+              <small>Cinema fitout & seating costing</small>
+            </div>
+            <span class="drawer-badge-live">Live</span>
+          </a>
+        </div>
+
+        <div class="drawer-footer">
+          <div class="drawer-note">
+            <span class="status-dot"></span>Model synced from ROI workbook
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main id="top">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Proposal & Cost Intelligence</p>
+            <h1>Seating Investment Proposal</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="button button-quiet" id="exportButton">Export summary <span aria-hidden="true">↓</span></button>
+            <button class="button button-quiet" id="resetProposalBtn">Reset defaults</button>
+            <button class="button button-logout" id="logoutButton">Logout <span aria-hidden="true">↗</span></button>
+          </div>
+        </header>
+
+        <!-- Hero Section with Ambient Glow -->
+        <section class="hero" id="overview">
+          <div class="hero-projector-beam" aria-hidden="true"></div>
+          <div class="hero-reel-watermark" aria-hidden="true">
+            <img src="sanelite-reel.png" alt="" class="reel-watermark-img" />
+          </div>
+
+          <div class="hero-content">
+            <h2>Seating Proposal: Tailor every screen to perfection.</h2>
+            <p>Configure Cinema Type (Premium vs Ultra Luxurious), carpet area, customize screen-wise seating format & rates with 18% GST, and review the total cinema project investment.</p>
+          </div>
+
+          <!-- Glassmorphic Grand Total Hero Card -->
+          <div class="hero-investment glass-card">
+            <div class="glass-card-glow" aria-hidden="true"></div>
+            <div class="glass-card-tag">Total Cinema Investment</div>
+            <strong id="heroGrandTotal">₹5.93 Cr</strong>
+            <small id="heroFitoutAndSeats">Fitout ₹2.70 Cr + Seating ₹3.23 Cr</small>
+          </div>
+        </section>
+
+        <!-- Proposal Metadata Panel (Client Details) -->
+        <section class="panel" style="margin-bottom: 22px;">
+          <div class="panel-heading" style="margin-bottom: 16px;">
+            <div>
+              <p class="eyebrow">Proposal Header</p>
+              <h3>Client & Project Information</h3>
+            </div>
+            <span class="pill">Editable metadata</span>
+          </div>
+
+          <div class="proposal-metadata-grid">
+            <label>
+              Client / Franchisee
+              <input id="clientName" type="text" value="[Client Name]" placeholder="Client Name" />
+            </label>
+            <label>
+              Project Location
+              <input id="projectLocation" type="text" value="[Project Location]" placeholder="Location" />
+            </label>
+            <label>
+              Total Screens
+              <input id="totalScreensInput" type="number" min="1" max="24" value="3" placeholder="3" />
+            </label>
+            <label>
+              Date Prepared
+              <input id="datePrepared" type="text" value="11 July 2026" placeholder="DD Month YYYY" />
+            </label>
+          </div>
+        </section>
+
+        <!-- Section 1: Cinema Type & Carpet Area Fitout Cost -->
+        <section class="panel" id="fitoutSection" style="margin-bottom: 22px;">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Section 1</p>
+              <h3>Cinema Type & Fitout Costing</h3>
+            </div>
+            <span class="pill neutral">Civil & Interior Fitout</span>
+          </div>
+
+          <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px 0;">
+            Choose the cinema interior and architectural fitout specification. Base fitout is calculated directly as <strong>Carpet Area × Rate per sq.ft</strong>:
+          </p>
+
+          <!-- Interactive Cinema Type Cards (2 Options with Editable Rates) -->
+          <div class="cinema-type-grid">
+            <div class="cinema-type-card active" id="typeCardPremium" data-type="premium">
+              <div class="cinema-type-header">
+                <span class="cinema-type-title">💎 Premium Cinema</span>
+                <div class="cinema-rate-edit-badge" title="Click to edit rate per sq. ft.">
+                  <span class="rate-currency">₹</span>
+                  <input type="number" id="ratePremiumInput" class="rate-sqft-input" value="3000" min="500" step="50" aria-label="Premium Rate per sq ft" />
+                  <span class="rate-unit">/ sq.ft</span>
+                </div>
+              </div>
+              <p class="cinema-type-desc">
+                High-performance acoustic wall panelling, premium carpet flooring, standard ambient auditorium lighting, and optimized projection throw setup.
+              </p>
+            </div>
+
+            <div class="cinema-type-card" id="typeCardUltra" data-type="ultra">
+              <div class="cinema-type-header">
+                <span class="cinema-type-title">👑 Ultra Luxurious Cinema</span>
+                <div class="cinema-rate-edit-badge" title="Click to edit rate per sq. ft.">
+                  <span class="rate-currency">₹</span>
+                  <input type="number" id="rateUltraInput" class="rate-sqft-input" value="3500" min="500" step="50" aria-label="Ultra Luxurious Rate per sq ft" />
+                  <span class="rate-unit">/ sq.ft</span>
+                </div>
+              </div>
+              <p class="cinema-type-desc">
+                Bespoke Gold-Class acoustic fabric treatments, custom designer wooden finishes, architectural mood lighting, luxury lounge ambiance, and VIP foyer finishes.
+              </p>
+            </div>
+          </div>
+
+          <!-- Carpet Area Input & Calculated Fitout Cost Block -->
+          <div class="fitout-calculator-card">
+            <div class="fitout-input-group">
+              <label for="carpetAreaInput">Carpet Area (sq. ft.)</label>
+              <input id="carpetAreaInput" type="number" min="500" step="100" value="9000" placeholder="e.g. 9,000" />
+            </div>
+
+            <div class="fitout-cost-display">
+              <span>Civil & Interior Fitout Cost</span>
+              <strong id="dispFitoutCost">₹2,70,00,000</strong>
+              <small id="dispFitoutFormula">9,000 sq.ft × ₹3,000 / sq.ft</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Screen-Wise Seating Proposal Table (From User Image) -->
+        <section class="panel" id="seatingSection" style="margin-bottom: 22px;">
+          <div class="panel-heading" style="margin-bottom: 12px;">
+            <div>
+              <p class="eyebrow">Section 2</p>
+              <h3>Screen-by-Screen Seating Proposal</h3>
+            </div>
+            <div class="seating-header-actions">
+              <span class="pill" style="background: #fff9c4; color: #8d6e00; border: 1px solid #fbc02d;">Yellow cells = Editable Rate</span>
+              <button id="btnAddRow" type="button" class="btn-add-row">+ Add Screen / Row</button>
+            </div>
+          </div>
+
+          <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 14px 0;">
+            Configure individual screens, seating format, seat count, and seat unit rate. All amounts and GST @ 18% update automatically:
+          </p>
+
+          <!-- Mobile Scroll Indicator Hint -->
+          <div class="table-scroll-hint">
+            <span>⇄ Swipe horizontally to view all columns, 18% GST & Grand Total</span>
+            <span style="font-size: 11.5px; opacity: 0.85;">8 Columns</span>
+          </div>
+
+          <!-- Seating Proposal Table matching Image -->
+          <div class="seating-table-wrap">
+            <table class="seating-table" id="seatingTable">
+              <thead>
+                <tr>
+                  <th style="min-width: 65px; width: 65px; text-align: center;">Screen</th>
+                  <th style="min-width: 180px;">Seating Format</th>
+                  <th style="min-width: 100px; width: 100px; text-align: right;">No. of Seats</th>
+                  <th style="min-width: 135px; width: 135px; text-align: right; background: #193150;">Rate per Seat (Rs.)</th>
+                  <th style="min-width: 135px; width: 135px; text-align: right;">Amount (Rs.)</th>
+                  <th style="min-width: 125px; width: 125px; text-align: right;">GST @ 18% (Rs.)</th>
+                  <th style="min-width: 145px; width: 145px; text-align: right;">Total (Rs.)</th>
+                  <th style="min-width: 50px; width: 50px; text-align: center;">Act</th>
+                </tr>
+              </thead>
+              <tbody id="seatingTableBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" style="font-weight: 800; font-size: 14px;">Grand Total</td>
+                  <td id="totalSeatsCell" class="cell-numeric" style="font-weight: 800;">290</td>
+                  <td class="cell-center" style="color: var(--muted);">—</td>
+                  <td id="totalAmountCell" class="cell-numeric" style="font-weight: 800;">2,74,00,000</td>
+                  <td id="totalGstCell" class="cell-numeric" style="font-weight: 800;">49,32,000</td>
+                  <td id="totalGrandCell" class="cell-numeric" style="font-weight: 800; color: var(--accent-dark);">3,23,32,000</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Notes -->
+          <div style="margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.6;">
+            <div><strong style="color: var(--ink);">Note:</strong></div>
+            <div>* GST is applied at 18% on the seating amount, as per current government norms.</div>
+            <div>* Rates above are exclusive of civil work, interiors, projection/sound equipment, and statutory approvals.</div>
+            <div>* Figures are indicative and subject to change until confirmed in the definitive agreement.</div>
+          </div>
+        </section>
+
+        <!-- Section 3: Total Cinema Project Costing Summary -->
+        <section class="panel project-cost-panel" id="projectCostSection">
+          <div class="panel-heading" style="margin-bottom: 12px;">
+            <div>
+              <p class="eyebrow">Section 3</p>
+              <h3>Total Cinema Project Costing (Grand Summary)</h3>
+            </div>
+            <span class="pill neutral">Combined Capital Outlay</span>
+          </div>
+
+          <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px 0;">
+            Consolidated investment required for complete cinema setup, combining architectural fitout and screen seating:
+          </p>
+
+          <div class="grand-summary-grid">
+            <div class="grand-summary-card">
+              <span>Civil & Interior Fitout</span>
+              <strong id="summaryFitoutCost">₹2.70 Cr</strong>
+              <small id="summaryFitoutDetails">9,000 sq.ft @ ₹3,000/sqft</small>
+            </div>
+
+            <div class="grand-summary-card">
+              <span>Seating Base Amount</span>
+              <strong id="summarySeatingBase">₹2.74 Cr</strong>
+              <small id="summarySeatsCount">290 Total Seats</small>
+            </div>
+
+            <div class="grand-summary-card">
+              <span>GST on Seating (18%)</span>
+              <strong id="summarySeatingGst">₹49.32 L</strong>
+              <small>Government statutory norm</small>
+            </div>
+
+            <div class="grand-summary-card">
+              <span>Total Seating (incl. GST)</span>
+              <strong id="summarySeatingTotal">₹3.23 Cr</strong>
+              <small>All screens consolidated</small>
+            </div>
+
+            <!-- Grand Total Highlight Card -->
+            <div class="grand-total-card">
+              <div class="title-wrap">
+                <p>Comprehensive Setup Investment</p>
+                <h2>Total Cinema Project Cost</h2>
+                <small style="color: #c5c4d2;">Civil & Interior Fitout + Screen Seating (incl. 18% GST)</small>
+              </div>
+              <div class="amount-wrap">
+                <strong id="summaryGrandTotal">₹5,93,32,000</strong>
+                <small id="summaryGrandTotalShort">₹5.93 Cr total investment</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Editable Disclosures & Notes Panel -->
+        <section class="panel notes-panel" id="proposalNotesPanel">
+          <div class="panel-heading" style="margin-bottom: 14px;">
+            <div>
+              <p class="eyebrow">Documentation</p>
+              <h3>Proposal Terms & Disclosures</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="pill neutral">Included in PDF</span>
+              <button id="resetNoteBtn" type="button" class="text-button">Reset Notes</button>
+            </div>
+          </div>
+          <p style="color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 12px 0;">
+            Customize the proposal notes and terms below. All edits will appear directly in the exported PDF summary:
+          </p>
+          <textarea id="proposalNotesText" rows="4" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; line-height: 1.6; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; resize: vertical; outline: none;"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted);">
+            <span>💡 Tip: Adjust terms, delivery timeline, or commercial milestones as needed.</span>
+            <span id="noteStatusNotice" style="color: #15803d; font-weight: 600;"></span>
+          </div>
+        </section>
+      </main>
+
+      <!-- Mobile Bottom Tab Navigation (3 Options: FOCO, FOFO, Seating) -->
+      <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Model switcher">
+        <a href="index.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">📊</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOCO Model</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+        <a href="fofo-model.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">🎬</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOFO Model</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+        <a href="seating-proposal.html" class="bottom-nav-item active" aria-current="page">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">💺</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">Seating</span>
+            <span class="bottom-nav-tag">LIVE</span>
+          </div>
+        </a>
+      </nav>
+    </div>
+
+    <div class="toast" id="toast" role="status">Proposal PDF downloaded</div>
+    <script src="jspdf.umd.min.js"></script>
+    <script src="jspdf.plugin.autotable.min.js"></script>
+    <script src="logo-data.js"></script>
+    <script src="seating.js"></script>
+  </body>
+</html>

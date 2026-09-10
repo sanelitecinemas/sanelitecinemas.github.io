@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101018" />
+    <title>FOFO Model — Sanelite Cinemas ROI Module</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .range-row { grid-template-columns: 1fr auto !important; }
+      .range-row output { min-width: 44px; white-space: nowrap; font-weight: 700; }
+    </style>
+    <script>
+      if (!sessionStorage.getItem('sanelite_auth')) {
+        window.location.replace('login.html');
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Sanelite Cinemas home"><img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="brand-logo" /></a>
+        <nav aria-label="Primary navigation">
+          <a class="nav-link" href="index.html">
+            <span>📊 FOCO model</span>
+          </a>
+          <a class="nav-link active" href="fofo-model.html">
+            <span>🎬 FOFO model</span>
+            <span class="sidebar-nav-badge">Live</span>
+          </a>
+          <a class="nav-link" href="seating-proposal.html">
+            <span>💺 Seating proposal</span>
+          </a>
+        </nav>
+        <div class="sidebar-note"><span class="status-dot"></span>Model synced from ROI workbook</div>
+      </aside>
+
+      <!-- Mobile App Header (Visible on mobile & tablet viewports) -->
+      <header class="mobile-header">
+        <div class="mobile-header-left">
+          <button id="mobileMenuBtn" class="mobile-menu-trigger" aria-label="Open navigation menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <a class="mobile-brand" href="index.html" aria-label="Sanelite Cinemas home">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="mobile-brand-logo" />
+          </a>
+        </div>
+        <div class="mobile-header-right">
+          <button class="mobile-btn mobile-btn-export" id="mobileExportButton">
+            <span>Export</span>
+            <span aria-hidden="true">↓</span>
+          </button>
+          <button class="mobile-btn mobile-btn-logout" id="mobileLogoutButton" aria-label="Logout" title="Logout">
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Mobile Navigation Drawer Backdrop -->
+      <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+      <!-- Slide-out Mobile Navigation Drawer -->
+      <nav id="mobileDrawer" class="mobile-drawer" aria-label="Mobile navigation">
+        <div class="drawer-header">
+          <a class="drawer-brand" href="index.html">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="drawer-logo" />
+          </a>
+          <button id="closeDrawerBtn" class="drawer-close-btn" aria-label="Close navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="drawer-links">
+          <a class="drawer-link" href="index.html">
+            <span class="drawer-link-icon">📊</span>
+            <div class="drawer-link-text">
+              <strong>FOCO Model</strong>
+              <small>Company operated franchise model</small>
+            </div>
+          </a>
+          <a class="drawer-link active" href="fofo-model.html">
+            <span class="drawer-link-icon">🎬</span>
+            <div class="drawer-link-text">
+              <strong>FOFO Model</strong>
+              <small>Franchisee revenue & OPEX sharing</small>
+            </div>
+            <span class="drawer-badge-live">Live</span>
+          </a>
+          <a class="drawer-link" href="seating-proposal.html">
+            <span class="drawer-link-icon">💺</span>
+            <div class="drawer-link-text">
+              <strong>Seating Proposal</strong>
+              <small>Cinema fitout & seating costing</small>
+            </div>
+          </a>
+        </div>
+
+        <div class="drawer-footer">
+          <div class="drawer-note">
+            <span class="status-dot"></span>Model synced from ROI workbook
+          </div>
+        </div>
+      </nav>
+
+      <main id="top">
+        <header class="topbar">
+          <div><p class="eyebrow">Franchise intelligence</p><h1>FOFO ROI control room</h1></div>
+          <div class="topbar-actions">
+            <button class="button button-quiet" id="exportButton">Export summary <span aria-hidden="true">↓</span></button>
+            <button class="button button-logout" id="logoutButton">Logout <span aria-hidden="true">↗</span></button>
+          </div>
+        </header>
+
+        <section class="hero" id="overview">
+          <!-- Ambient Projector Glow -->
+          <div class="hero-projector-beam" aria-hidden="true"></div>
+
+          <!-- Sanelite Film Reel Watermark Backdrop -->
+          <div class="hero-reel-watermark" aria-hidden="true">
+            <img src="sanelite-reel.png" alt="" class="reel-watermark-img" />
+          </div>
+
+          <div class="hero-content">
+            <h2>FOFO Model: See the story behind every seat.</h2>
+            <p>Fine-tune independent Box Office (45%) and F&B (80%) Franchisee revenue share, operational expenses, and see separate returns update instantly.</p>
+          </div>
+
+          <!-- Luxury Glassmorphic Investment Card -->
+          <div class="hero-investment glass-card">
+            <div class="glass-card-glow" aria-hidden="true"></div>
+            <div class="glass-card-tag">Initial investment</div>
+            <strong id="investmentHero">₹2.25 Cr</strong>
+            <small>Base franchise setup</small>
+          </div>
+        </section>
+
+        <!-- Top Distinct Banners: Franchisee Box Office & Franchisee F&B -->
+        <section class="metrics" style="grid-template-columns: repeat(2, 1fr);" aria-label="Key performance metrics">
+          <article class="metric-card featured">
+            <span>Franchisee Box Office (45%)</span>
+            <strong id="monthlyInvestorShare">₹6.33 L</strong>
+            <small id="annualInvestorShareNote">₹76.00 L annually</small>
+          </article>
+          <article class="metric-card" style="border-color: #bbf7d0; background: #f0fdf4;">
+            <span style="color: #15803d; font-weight: 600;">Franchisee F&B (80%)</span>
+            <strong id="monthlyInvestorFnbShare" style="color: #166534;">₹4.38 L</strong>
+            <small id="annualInvestorFnbNote" style="color: #15803d;">₹52.53 L annually</small>
+          </article>
+        </section>
+
+        <section class="grid two-up" id="revenue">
+          <article class="panel inputs-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Operating assumptions</p><h3>Fine-tune FOFO model</h3></div><button id="resetButton" class="text-button">Reset</button></div>
+            <div class="assumptions">
+              <label>Seats <input id="seats" type="number" min="1" value="210" /></label>
+              <label>Initial investment <div class="currency-input"><span>₹</span><input id="investment" type="number" min="0" step="100000" value="22500000" /></div></label>
+              <label>Mon–Thu shows / day <input id="weekdayShowsPerDay" type="number" min="1" max="12" value="2" /></label>
+              <label>Fri–Sun shows / day <input id="weekendShowsPerDay" type="number" min="1" max="12" value="4" /></label>
+              <label>Weekday occupancy
+                <div class="range-row">
+                  <input id="weekdayOccupancy" type="range" min="0" max="100" value="35" />
+                  <div class="range-stepper">
+                    <button type="button" class="stepper-btn stepper-btn-minus" data-target="weekdayOccupancy" aria-label="Decrease Weekday Occupancy" title="Decrease">−</button>
+                    <output id="weekdayOccupancyValue">35%</output>
+                    <button type="button" class="stepper-btn stepper-btn-plus" data-target="weekdayOccupancy" aria-label="Increase Weekday Occupancy" title="Increase">+</button>
+                  </div>
+                </div>
+              </label>
+              <label>Weekend occupancy
+                <div class="range-row">
+                  <input id="weekendOccupancy" type="range" min="0" max="100" value="45" />
+                  <div class="range-stepper">
+                    <button type="button" class="stepper-btn stepper-btn-minus" data-target="weekendOccupancy" aria-label="Decrease Weekend Occupancy" title="Decrease">−</button>
+                    <output id="weekendOccupancyValue">45%</output>
+                    <button type="button" class="stepper-btn stepper-btn-plus" data-target="weekendOccupancy" aria-label="Increase Weekend Occupancy" title="Increase">+</button>
+                  </div>
+                </div>
+              </label>
+              <label>Weekday ticket rate <div class="currency-input"><span>₹</span><input id="weekdayRate" type="number" min="0" value="200" /></div></label>
+              <label>Weekend ticket rate <div class="currency-input"><span>₹</span><input id="weekendRate" type="number" min="0" value="250" /></div></label>
+              
+              <!-- Franchisee Revenue Share Controls -->
+              <label>Franchisee share (Box office)
+                <div class="range-row">
+                  <input id="investorShare" type="range" min="0" max="100" value="45" />
+                  <div class="range-stepper">
+                    <button type="button" class="stepper-btn stepper-btn-minus" data-target="investorShare" aria-label="Decrease Franchisee Box Office Share" title="Decrease">−</button>
+                    <output id="investorShareValue">45%</output>
+                    <button type="button" class="stepper-btn stepper-btn-plus" data-target="investorShare" aria-label="Increase Franchisee Box Office Share" title="Increase">+</button>
+                  </div>
+                </div>
+              </label>
+              <label>Franchisee share (F&B)
+                <div class="range-row">
+                  <input id="investorFnbShare" type="range" min="0" max="100" value="80" />
+                  <div class="range-stepper">
+                    <button type="button" class="stepper-btn stepper-btn-minus" data-target="investorFnbShare" aria-label="Decrease Franchisee F&B Share" title="Decrease">−</button>
+                    <output id="investorFnbShareValue">80%</output>
+                    <button type="button" class="stepper-btn stepper-btn-plus" data-target="investorFnbShare" aria-label="Increase Franchisee F&B Share" title="Increase">+</button>
+                  </div>
+                </div>
+              </label>
+
+              <!-- F&B Spend -->
+              <label style="grid-column: 1 / -1;">F&B spend / booking
+                <div class="currency-input"><span>₹</span><input id="foodRate" type="number" min="0" value="80" /></div>
+              </label>
+
+              <!-- Franchisee Operating Expenses (Editable) -->
+              <label>Electricity expense (monthly)
+                <div class="currency-input"><span>₹</span><input id="electricityCost" type="number" min="0" step="5000" value="150000" /></div>
+              </label>
+              <label>Staff salary expense (monthly)
+                <div class="currency-input"><span>₹</span><input id="salaryCost" type="number" min="0" step="5000" value="120000" /></div>
+              </label>
+              <label style="grid-column: 1 / -1;">Miscellaneous expense (monthly)
+                <div class="currency-input"><span>₹</span><input id="miscCost" type="number" min="0" step="2000" value="50000" /></div>
+              </label>
+
+              <!-- PDF Report Note Quick Navigation -->
+              <div style="grid-column: 1 / -1; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11.5px; color: var(--muted); font-weight: 600;">PDF Disclosures Note:</span>
+                <a href="#fofoNotesPanel" style="font-size: 11.5px; color: var(--accent); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                  ✏️ Edit Report Note &darr;
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel revenue-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Monthly revenue</p><h3>Where income comes from</h3></div><span class="pill">FOFO Split</span></div>
+            <div class="donut-wrap">
+              <div class="donut" id="revenueDonut"><div><strong id="grossRevenue">₹22.38 L</strong><span>total income</span></div></div>
+              <ul class="legend">
+                <li><i class="swatch ticket"></i><span>Box office</span><strong id="ticketRevenue">₹14.07 L</strong></li>
+                <li><i class="swatch food"></i><span>Food & beverages</span><strong id="foodRevenue">₹5.47 L</strong></li>
+                <li><i class="swatch taxes"></i><span>Taxes</span><strong id="taxRevenue">₹2.83 L</strong></li>
+              </ul>
+            </div>
+            <div class="revenue-footer" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Total Net Available</span>
+                <strong id="availableForSharing" style="font-size: 16px;">₹19.55 L</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; border-top: 1px dashed var(--line); padding-top: 6px;">
+                <span style="color: var(--muted);">Box Office (Franchisee): <strong id="boxOfficeSplitDisplay" style="color: var(--ink);">₹6.33 L (45%)</strong></span>
+                <span style="color: var(--muted);">F&B (Franchisee): <strong id="fnbSplitDisplay" style="color: var(--ink);">₹4.38 L (80%)</strong></span>
+              </div>
+            </div>
+
+            <!-- Franchisee Operating Expenses (OPEX) Section -->
+            <div class="fofo-expenses-section" style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--line);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;">
+                <span style="font-size: 11px; font-weight: 750; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Franchisee Operating Expenses</span>
+                <span class="pill" style="background: #fff0ec; color: var(--accent-dark); font-size: 9px; padding: 3px 6px;">Deducted from Franchisee</span>
+              </div>
+              <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; font-size: 12px; color: var(--muted);">
+                <li style="display: flex; justify-content: space-between;"><span>⚡ Electricity expense</span><strong id="dispElectricity" style="color: var(--ink);">₹1.50 L</strong></li>
+                <li style="display: flex; justify-content: space-between;"><span>👥 Staff salary expense</span><strong id="dispSalary" style="color: var(--ink);">₹1.20 L</strong></li>
+                <li style="display: flex; justify-content: space-between;"><span>📦 Miscellaneous expense</span><strong id="dispMisc" style="color: var(--ink);">₹50,000</strong></li>
+                <li style="display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 6px; font-weight: 700; color: var(--accent-dark);">
+                  <span>Total Monthly Expenses</span><strong id="dispTotalExpenses">-₹3.20 L</strong>
+                </li>
+              </ul>
+              <div style="margin-top: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; padding: 11px 14px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span style="display: block; font-size: 10.5px; font-weight: 750; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Franchisee Net Take-Home</span>
+                  <small id="dispExpenseSubNote" style="color: #15803d; font-size: 11px;">Gross ₹10.71 L − Expenses ₹3.20 L</small>
+                </div>
+                <strong id="dispInvestorNetMonthly" style="font-size: 20px; color: #166534; font-weight: 800; letter-spacing: -0.5px;">₹7.51 L</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="grid two-up" id="projection">
+          <article class="panel table-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Ticketing engine</p><h3>Show-by-show capacity</h3></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Period</th><th>Shows</th><th>Total Seats</th><th>Bookings</th><th>Revenue</th></tr></thead><tbody><tr><td><span class="day-badge weekday">Mon–Thu</span></td><td id="weekdayShows">36</td><td id="weekdayTotalSeats">7,560</td><td id="weekdayBookings">2,646</td><td id="weekdayRevenue">₹5.29 L</td></tr><tr><td><span class="day-badge weekend">Fri–Sun</span></td><td id="weekendShows">48</td><td id="weekendTotalSeats">10,080</td><td id="weekendBookings">4,536</td><td id="weekendRevenue">₹11.34 L</td></tr></tbody></table></div><p class="source-note" id="showsSourceNote">18 weekdays × 2 shows (7,560 seats) · 12 weekend days × 4 shows (10,080 seats)</p>
+          </article>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">ROI trajectory</p><h3>Franchisee three-year outlook</h3></div><span class="pill neutral">8% annual growth</span></div>
+            <div class="chart-area" id="chartArea" role="img" aria-label="Cumulative ROI projection by year"><div class="chart-grid"></div><div class="bars"><div class="bar-item"><div class="bar" id="barOne"></div><strong id="barOneValue">₹1.13 Cr</strong><span>Year 1</span></div><div class="bar-item"><div class="bar" id="barTwo"></div><strong id="barTwoValue">₹2.30 Cr</strong><span>Year 2</span></div><div class="bar-item"><div class="bar" id="barThree"></div><strong id="barThreeValue">₹3.53 Cr</strong><span>Year 3</span></div></div></div><div class="chart-caption"><span>Includes 10% annual depreciation on the remaining fixed investment.</span><strong id="payback">Net payback in 2.5 years</strong></div>
+          </article>
+        </section>
+
+        <!-- FOFO Model Disclosures & Notes (Editable) -->
+        <section class="panel notes-panel" id="fofoNotesPanel" style="margin-top: 22px;">
+          <div class="panel-heading" style="margin-bottom: 14px;">
+            <div>
+              <p class="eyebrow">Report documentation</p>
+              <h3>FOFO Model Disclosures & Notes</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="pill neutral">Included in PDF</span>
+              <button id="resetNoteBtn" type="button" class="text-button">Reset Note</button>
+            </div>
+          </div>
+          <p style="color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 12px 0;">
+            Customize the operational and financial disclosures below. Any edits made here will appear directly in the <strong>Disclosures & Notes Box</strong> at the end of the exported PDF summary:
+          </p>
+          <textarea id="fofoNotesText" rows="5" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; line-height: 1.6; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; resize: vertical; outline: none;" placeholder="Enter custom notes or disclosures here..."></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted);">
+            <span>💡 Tip: You can add new terms, edit bullet points, or tailor operational parameters.</span>
+            <span id="noteStatusNotice" style="color: #15803d; font-weight: 600;"></span>
+          </div>
+        </section>
+      </main>
+
+      <!-- Mobile Bottom Tab Navigation (3 Options: FOCO, FOFO, Seating) -->
+      <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Model switcher">
+        <a href="index.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">📊</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOCO Model</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+        <a href="fofo-model.html" class="bottom-nav-item active" aria-current="page">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">🎬</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOFO Model</span>
+            <span class="bottom-nav-tag">LIVE</span>
+          </div>
+        </a>
+        <a href="seating-proposal.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">💺</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">Seating</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+      </nav>
+    </div>
+    <div class="toast" id="toast" role="status">PDF downloaded</div>
+    <script src="jspdf.umd.min.js"></script>
+    <script src="jspdf.plugin.autotable.min.js"></script>
+    <script src="logo-data.js"></script>
+    <script src="fofo.js"></script>
+  </body>
+</html>
