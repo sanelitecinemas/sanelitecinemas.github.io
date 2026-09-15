@@ -1,18 +1,20 @@
 const defaults = {
-  seats: 210,
+  seats: 250,
   investment: 22500000,
-  weekdayShowsPerDay: 2,
-  weekendShowsPerDay: 4,
-  weekdayOccupancy: 35,
+  weekdayShowsPerDay: 4,
+  weekendShowsPerDay: 5,
+  weekdayOccupancy: 25,
   weekendOccupancy: 45,
   weekdayRate: 200,
   weekendRate: 250,
   investorShare: 45,
   foodRate: 80,
+  fnbCost: 25,
   investorFnbShare: 80,
   electricityCost: 150000,
   salaryCost: 120000,
-  miscCost: 50000
+  miscCost: 50000,
+  yoyGrowth: 5
 };
 
 const ids = Object.keys(defaults);
@@ -30,23 +32,27 @@ const pdfCurrency = (val) => {
   if (abs >= 100000) return `Rs. ${(val / 100000).toFixed(2)} L`;
   return `Rs. ${Math.round(val).toLocaleString('en-IN')}`;
 };
-const number = (id) => Number($(id).value) || 0;
+const number = (id) => Number($(id) ? $(id).value : 0) || 0;
 
 let isNoteUserModified = false;
 
 function generateDefaultNote(d) {
+  const growth = (d && d.yoyGrowth !== undefined) ? d.yoyGrowth : 5;
   return [
-    `• Franchisee Revenue Split: Franchisee receives ${d.investorSharePct}% of net Box Office ticket revenue and ${d.investorFnbSharePct}% of net Food & Beverage concessions revenue.`,
-    `• Operating Expenses (OPEX): Monthly expenses (Electricity: ${pdfCurrency(d.electricityCost)}, Staff Salary: ${pdfCurrency(d.salaryCost)}, Misc: ${pdfCurrency(d.miscCost)}, Total: ${pdfCurrency(d.totalExpenses)}) are borne exclusively by the Franchisee and deducted directly from the Franchisee gross share.`,
-    `• Net Franchisee Returns: Post-OPEX monthly net take-home is ${pdfCurrency(d.investorNetMonthly)} (${pdfCurrency(d.totalAnnualInvestorNet)} annually).`,
-    `• Growth & Tax Depreciation: Year 2 & 3 project +8% YoY admissions growth. Asset depreciation is modeled at standard 10% reducing balance for tax advantage.`
+    '• Under the FOFO model, the Franchisee shall receive Net Box Office Ticket Revenue and Net Food & Beverage Revenue generated from the Cinema.',
+    '• All day-to-day operational expenses (OPEX) of the Cinema shall be borne and paid by the Franchisee.',
+    '• The Franchisor shall provide the weekly movie content, programming and show scheduling for the Cinema.',
+    '• The Franchisor shall bear all charges payable towards movie producers/distributors, movie content and applicable screen charges.',
+    `• For financial projections, the Cinema shall be considered to achieve ${growth}% year-on-year growth in admissions during Year 2 and Year 3.`,
+    '• For financial and tax modelling purposes, the Cinema assets shall be considered to depreciate at 10% per annum on a reducing-balance basis, subject to applicable tax laws.',
+    '• The above growth and depreciation assumptions are for financial projection purposes only and shall not be construed as a guarantee of revenue, admissions, profitability or tax benefits by the Franchisor.'
   ].join('\n');
 }
 
 function model() {
   const seats = number('seats');
-  const weekdayShowsPerDay = number('weekdayShowsPerDay') || 2;
-  const weekendShowsPerDay = number('weekendShowsPerDay') || 4;
+  const weekdayShowsPerDay = number('weekdayShowsPerDay') || 4;
+  const weekendShowsPerDay = number('weekendShowsPerDay') || 5;
   const totalWeekdayShows = weekdayShowsPerDay * 18;
   const totalWeekendShows = weekendShowsPerDay * 12;
   const totalShows = totalWeekdayShows + totalWeekendShows;
@@ -69,7 +75,8 @@ function model() {
   // 1. Box Office Taxes & Net Revenue
   const gstTicket = ticketIncome * 18 / 118;
   const showTax = totalShows * 25;
-  const netTicket = ticketIncome - gstTicket - showTax;
+  const boxOfficeTax = gstTicket + showTax;
+  const netTicket = ticketIncome - boxOfficeTax;
 
   // Box Office FOFO Split: Investor Share (Default: 45%)
   const investorSharePct = number('investorShare') || 45;
@@ -85,11 +92,16 @@ function model() {
   const foodTax = foodIncome * 5 / 105;
   const netFood = foodIncome - foodTax;
 
-  // F&B FOFO Split: Investor Share (Default: 80%)
+  // F&B Cost (Default: 25% COGS)
+  const fnbCostPct = $('fnbCost') ? number('fnbCost') : 25;
+  const fnbCostAmount = netFood * (fnbCostPct / 100);
+  const netFoodAvailable = Math.max(0, netFood - fnbCostAmount);
+
+  // F&B FOFO Split on Net Margin: Investor Share (Default: 80%)
   const investorFnbSharePct = number('investorFnbShare') || 80;
   const companyFnbSharePct = 100 - investorFnbSharePct;
-  const investorFnbMonthlyShare = netFood * (investorFnbSharePct / 100);
-  const companyFnbMonthlyShare = netFood * (companyFnbSharePct / 100);
+  const investorFnbMonthlyShare = netFoodAvailable * (investorFnbSharePct / 100);
+  const companyFnbMonthlyShare = netFoodAvailable * (companyFnbSharePct / 100);
   const annualInvestorFnb = investorFnbMonthlyShare * 12;
   const annualCompanyFnb = companyFnbMonthlyShare * 12;
 
@@ -111,14 +123,16 @@ function model() {
   // Overall Totals
   const totalIncome = ticketIncome + foodIncome;
   const totalTaxes = gstTicket + showTax + foodTax;
-  const totalNetAvailable = netTicket + netFood;
+  const totalNetAvailable = netTicket + netFoodAvailable;
 
   const investment = number('investment');
   const yieldPct = investment ? (totalAnnualInvestorNet / investment) * 100 : 0;
   const paybackYears = totalAnnualInvestorNet ? investment / totalAnnualInvestorNet : 0;
 
   const depreciation = [investment * 0.1, investment * 0.09, investment * 0.081];
-  const yearlyShare = [totalAnnualInvestorNet, totalAnnualInvestorNet * 1.08, totalAnnualInvestorNet * 1.08 * 1.08];
+  const yoyGrowth = $('yoyGrowth') ? number('yoyGrowth') : 5;
+  const growthMult = 1 + (yoyGrowth / 100);
+  const yearlyShare = [totalAnnualInvestorNet, totalAnnualInvestorNet * growthMult, totalAnnualInvestorNet * growthMult * growthMult];
   const cumulative = [];
   yearlyShare.reduce((sum, amount, i) => {
     const total = sum + amount + depreciation[i];
@@ -148,11 +162,16 @@ function model() {
     ticketIncome,
     gstTicket,
     showTax,
+    boxOfficeTax,
     netTicket,
     foodRate,
     foodIncome,
     foodTax,
     netFood,
+    fnbCostPct,
+    fnbCostAmount,
+    netFoodAvailable,
+    yoyGrowth,
     investorSharePct,
     companySharePct,
     investorBoxOfficeShare,
@@ -205,6 +224,17 @@ function update() {
     $('investorFnbShareValue').value = `${d.investorFnbSharePct}%`;
     $('investorFnbShareValue').textContent = `${d.investorFnbSharePct}%`;
   }
+  if ($('fnbCostValue')) {
+    $('fnbCostValue').value = `${d.fnbCostPct}%`;
+    $('fnbCostValue').textContent = `${d.fnbCostPct}%`;
+  }
+  if ($('yoyGrowthValue')) {
+    $('yoyGrowthValue').value = `${d.yoyGrowth}%`;
+    $('yoyGrowthValue').textContent = `${d.yoyGrowth}%`;
+  }
+  if ($('fofoGrowthPill')) {
+    $('fofoGrowthPill').textContent = `${d.yoyGrowth}% annual growth`;
+  }
 
   // Hero Card
   if ($('investmentHero')) $('investmentHero').textContent = shortCurrency(d.investment);
@@ -218,9 +248,12 @@ function update() {
 
   // Monthly Revenue Panel: Gross & Net available
   if ($('grossRevenue')) $('grossRevenue').textContent = shortCurrency(d.totalIncome);
-  if ($('ticketRevenue')) $('ticketRevenue').textContent = shortCurrency(d.netTicket);
-  if ($('foodRevenue')) $('foodRevenue').textContent = shortCurrency(d.netFood);
-  if ($('taxRevenue')) $('taxRevenue').textContent = shortCurrency(d.totalTaxes);
+  if ($('ticketRevenue')) $('ticketRevenue').textContent = shortCurrency(d.ticketIncome);
+  if ($('foodRevenue')) $('foodRevenue').textContent = shortCurrency(d.foodIncome);
+  if ($('boxOfficeTaxDisplay')) $('boxOfficeTaxDisplay').textContent = `-${shortCurrency(d.boxOfficeTax)}`;
+  if ($('fnbTaxDisplay')) $('fnbTaxDisplay').textContent = `-${shortCurrency(d.foodTax)}`;
+  if ($('fnbCostDisplay')) $('fnbCostDisplay').textContent = `-${shortCurrency(d.fnbCostAmount)}`;
+  if ($('taxRevenue')) $('taxRevenue').textContent = `-${shortCurrency(d.totalTaxes)}`;
   if ($('availableForSharing')) $('availableForSharing').textContent = shortCurrency(d.totalNetAvailable);
 
   if ($('boxOfficeSplitDisplay')) {
@@ -304,6 +337,8 @@ function downloadPDF() {
   const cMuted = [75, 85, 99]; // Sharp slate-600 (not washed out)
   const cHighlightBg = [255, 244, 241];
   const cHighlightBorder = [254, 215, 170];
+  const cCardBg = [247, 247, 250];
+  const cCardBorder = [228, 228, 235];
 
   const pdfCurrencyWithStar = (val) => {
     const abs = Math.abs(val);
@@ -354,84 +389,97 @@ function downloadPDF() {
   doc.setLineWidth(0.3);
   doc.line(margin, 28, pageWidth - margin, 28);
 
-  // 2. Top 4 Franchisee KPI Cards (Height 23mm, spacious and bold)
+  // 2. Top 2 Franchisee KPI Cards (Height 23mm, exactly 2 boxes, perfectly aligned with tables below)
   const cardY = 31.5;
   const cardH = 23;
-  const gap = 3.5;
-  const cardW = (contentWidth - (gap * 3)) / 4; // 42.875mm
+  const cardW = (contentWidth - 6) / 2; // 88mm each (matches table columns below)
+  const card1X = margin;
+  const card2X = margin + cardW + 6;
 
-  const cards = [
-    {
-      title: `BOX OFFICE FRANCHISEE (${d.investorSharePct}%)`,
-      val: pdfCurrencyWithStar(d.investorBoxOfficeShare),
-      sub: `${pdfCurrency(d.annualInvestorBoxOffice)} annually`,
-      type: 'box_inv'
-    },
-    {
-      title: `F&B FRANCHISEE (${d.investorFnbSharePct}%)`,
-      val: pdfCurrencyWithStar(d.investorFnbMonthlyShare),
-      sub: `${pdfCurrency(d.annualInvestorFnb)} annually`,
-      type: 'fnb_inv'
-    },
-    {
-      title: 'FRANCHISEE GROSS SHARE',
-      val: pdfCurrencyWithStar(d.totalInvestorMonthly),
-      sub: `${pdfCurrency(d.totalInvestorMonthly * 12)} annually`,
-      type: 'gross_inv'
-    },
-    {
-      title: 'FRANCHISEE NET PROFIT',
-      val: pdfCurrencyWithStar(d.investorNetMonthly),
-      sub: `After ${pdfCurrency(d.totalExpenses)} OPEX`,
-      type: 'net_take'
-    }
-  ];
+  // Box 1: FRANCHISE SHARE (BOX OFFICE & F&B)
+  doc.setFillColor(255, 246, 240);
+  doc.setDrawColor(254, 215, 170);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(card1X, cardY, cardW, cardH, 2, 2, 'FD');
 
-  cards.forEach((card, idx) => {
-    const x = margin + (idx * (cardW + gap));
-    if (card.type === 'box_inv') {
-      doc.setFillColor(...cHighlightBg);
-      doc.setDrawColor(...cHighlightBorder);
-    } else if (card.type === 'fnb_inv') {
-      doc.setFillColor(240, 253, 244);
-      doc.setDrawColor(187, 247, 208);
-    } else if (card.type === 'gross_inv') {
-      doc.setFillColor(245, 243, 255);
-      doc.setDrawColor(221, 214, 254);
-    } else {
-      doc.setFillColor(235, 253, 240);
-      doc.setDrawColor(134, 239, 172);
-    }
-    doc.setLineWidth(0.3);
-    doc.roundedRect(x, cardY, cardW, cardH, 2, 2, 'FD');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.setTextColor(194, 65, 12);
+  doc.text('FRANCHISE SHARE (BOX OFFICE & F&B)', card1X + 4.5, cardY + 5.5);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.0);
-    if (card.type === 'box_inv') doc.setTextColor(...cAccentDark);
-    else if (card.type === 'fnb_inv') doc.setTextColor(...cFnb);
-    else if (card.type === 'gross_inv') doc.setTextColor(109, 40, 217);
-    else doc.setTextColor(20, 83, 45);
-    doc.text(card.title, x + 3.2, cardY + 5.6);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.2);
+  doc.setTextColor(...cMuted);
+  doc.text('Dual Revenue Streams', card1X + cardW - 4.5, cardY + 5.5, { align: 'right' });
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11.5);
-    if (card.type === 'box_inv') doc.setTextColor(...cAccentDark);
-    else if (card.type === 'fnb_inv') doc.setTextColor(...cFnbDark);
-    else if (card.type === 'gross_inv') doc.setTextColor(91, 33, 182);
-    else doc.setTextColor(20, 83, 45);
-    doc.text(card.val, x + 3.2, cardY + 13.8);
+  // Subtle vertical divider inside Card 1
+  doc.setDrawColor(254, 215, 170);
+  doc.setLineWidth(0.25);
+  doc.line(card1X + 44, cardY + 8, card1X + 44, cardY + cardH - 2.5);
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.8);
-    doc.setTextColor(...cMuted);
-    doc.text(card.sub, x + 3.2, cardY + 19.4);
-  });
+  // Left Column inside Box 1: Box Office Share
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.8);
+  doc.setTextColor(194, 65, 12);
+  doc.text(`BOX OFFICE (${d.investorSharePct}%)`, card1X + 4.5, cardY + 10.5);
 
-  // 3. Side-by-Side Balanced Tables (11 rows each, zero overlap)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(194, 65, 12);
+  doc.text(pdfCurrencyWithStar(d.investorBoxOfficeShare), card1X + 4.5, cardY + 16);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.3);
+  doc.setTextColor(...cMuted);
+  doc.text(`${pdfCurrency(d.annualInvestorBoxOffice)} annually`, card1X + 4.5, cardY + 20.2);
+
+  // Right Column inside Box 1: F&B Concessions Share
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.8);
+  doc.setTextColor(20, 83, 45);
+  doc.text(`F&B SHARE (${d.investorFnbSharePct}%)`, card1X + 48, cardY + 10.5);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(20, 83, 45);
+  doc.text(pdfCurrencyWithStar(d.investorFnbMonthlyShare), card1X + 48, cardY + 16);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.3);
+  doc.setTextColor(...cMuted);
+  doc.text(`${pdfCurrency(d.annualInvestorFnb)} annually`, card1X + 48, cardY + 20.2);
+
+  // Box 2: FRANCHISE TOTAL SHARE (Last Box, Net Profit Removed)
+  doc.setFillColor(245, 243, 255);
+  doc.setDrawColor(221, 214, 254);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(card2X, cardY, cardW, cardH, 2, 2, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.setTextColor(109, 40, 217);
+  doc.text('FRANCHISE TOTAL SHARE', card2X + 5, cardY + 5.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.3);
+  doc.setTextColor(124, 58, 237);
+  doc.text('Monthly & Annual Combined Total', card2X + cardW - 5, cardY + 5.5, { align: 'right' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13.5);
+  doc.setTextColor(91, 33, 182);
+  doc.text(`${pdfCurrencyWithStar(d.totalInvestorMonthly)} / month`, card2X + 5, cardY + 14.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.8);
+  doc.setTextColor(...cMuted);
+  doc.text(`${pdfCurrency(d.totalInvestorMonthly * 12)} Annual Total Franchise Share (BO + F&B Combined)`, card2X + 5, cardY + 20.2);
+
+  // 3. Side-by-Side Balanced Tables (13 rows each, zero overlap)
   const tableY = 58;
   const colW = (contentWidth - 6) / 2; // 88mm each
 
-  // Left Table: Operating Assumptions (11 rows)
+  // Left Table: Operating Assumptions & Statutory Taxes (13 rows)
   doc.autoTable({
     startY: tableY,
     margin: { left: margin },
@@ -443,68 +491,29 @@ function downloadPDF() {
       ['Occupancy (Wkday / Wkend)', `${d.weekdayOccupancy}% / ${d.weekendOccupancy}%`],
       ['Ticket Price (Wkday / Wkend)', `Rs. ${d.weekdayRate} / Rs. ${d.weekendRate}`],
       ['F&B Spend / Booking', `Rs. ${d.foodRate}`],
+      ['F&B Cost (COGS)', `${d.fnbCostPct}% (${pdfCurrency(d.fnbCostAmount)})`],
       ['Initial Franchise Capital', pdfCurrency(d.investment)],
+      ['Box Office Tax (18% + Show)', `-${pdfCurrency(d.boxOfficeTax)}`],
+      ['F&B Tax (5% GST Inclusive)', `-${pdfCurrency(d.foodTax)}`],
+      ['Total Statutory Taxes Deducted', `-${pdfCurrency(d.totalTaxes)}`],
       ['Franchisee Box Office Share', `${d.investorSharePct}%`],
       ['Franchisee F&B Revenue Share', `${d.investorFnbSharePct}%`],
-      ['Monthly Electricity OPEX', pdfCurrency(d.electricityCost)],
-      ['Monthly Staff Salary OPEX', pdfCurrency(d.salaryCost)],
-      ['Monthly Misc & Sundry OPEX', pdfCurrency(d.miscCost)]
+      ['YoY Admissions Growth', `${d.yoyGrowth}% / Year`]
     ],
     theme: 'plain',
     headStyles: {
       fillColor: [36, 36, 48],
       textColor: [255, 255, 255],
-      fontSize: 7.6,
+      fontSize: 7.5,
       fontStyle: 'bold',
-      cellPadding: 2.0
+      cellPadding: 1.8
     },
     styles: {
-      fontSize: 7.4,
-      cellPadding: 1.9,
+      fontSize: 7.1,
+      cellPadding: 1.5,
       lineColor: [225, 225, 235],
       lineWidth: 0.2,
-      minCellHeight: 5.1
-    },
-    columnStyles: {
-      0: { textColor: [30, 41, 59], cellWidth: 54 },
-      1: { halign: 'right', fontStyle: 'bold', textColor: cDark, cellWidth: 34 }
-    }
-  });
-  const leftFinalY = doc.lastAutoTable.finalY;
-
-  // Right Table: Monthly Franchisee Revenue & OPEX Sharing (11 rows, perfectly aligned)
-  doc.autoTable({
-    startY: tableY,
-    margin: { left: margin + colW + 6 },
-    tableWidth: colW,
-    head: [['MONTHLY FRANCHISEE REVENUE & OPEX', 'AMOUNT']],
-    body: [
-      ['Net Box Office Revenue', pdfCurrency(d.netTicket)],
-      ['  - Franchisee Box Office Share (' + d.investorSharePct + '%)', pdfCurrency(d.investorBoxOfficeShare)],
-      ['Net F&B Concessions Revenue', pdfCurrency(d.netFood)],
-      ['  - Franchisee F&B Share (' + d.investorFnbSharePct + '%)', pdfCurrency(d.investorFnbMonthlyShare)],
-      ['Franchisee Gross Monthly Share', pdfCurrency(d.totalInvestorMonthly)],
-      ['Less: Electricity OPEX', `-${pdfCurrency(d.electricityCost)}`],
-      ['Less: Staff Salary OPEX', `-${pdfCurrency(d.salaryCost)}`],
-      ['Less: Misc & Sundry OPEX', `-${pdfCurrency(d.miscCost)}`],
-      ['Total Monthly OPEX Deductions', `-${pdfCurrency(d.totalExpenses)}`],
-      ['Franchisee Net Monthly Take-Home', pdfCurrency(d.investorNetMonthly)],
-      ['Franchisee Net Annual Take-Home', pdfCurrency(d.totalAnnualInvestorNet)]
-    ],
-    theme: 'plain',
-    headStyles: {
-      fillColor: [36, 36, 48],
-      textColor: [255, 255, 255],
-      fontSize: 7.6,
-      fontStyle: 'bold',
-      cellPadding: 2.0
-    },
-    styles: {
-      fontSize: 7.4,
-      cellPadding: 1.9,
-      lineColor: [225, 225, 235],
-      lineWidth: 0.2,
-      minCellHeight: 5.1
+      minCellHeight: 4.6
     },
     columnStyles: {
       0: { textColor: [30, 41, 59], cellWidth: 54 },
@@ -512,26 +521,94 @@ function downloadPDF() {
     },
     didParseCell: function(data) {
       if (data.section === 'body') {
-        if (data.row.index === 0 || data.row.index === 2) {
-          data.cell.styles.fillColor = [245, 245, 250];
-          data.cell.styles.fontStyle = 'bold';
+        if (data.row.index === 7 || data.row.index === 8) {
+          data.cell.styles.textColor = [160, 60, 30];
         }
-        if (data.row.index === 1) data.cell.styles.textColor = cAccentDark;
-        if (data.row.index === 3) data.cell.styles.textColor = cFnbDark;
-        if (data.row.index === 4) data.cell.styles.fontStyle = 'bold';
-        if (data.row.index >= 5 && data.row.index <= 7) {
-          data.cell.styles.textColor = [120, 50, 50];
-        }
-        if (data.row.index === 8) {
+        if (data.row.index === 9) {
           data.cell.styles.textColor = cAccentDark;
           data.cell.styles.fontStyle = 'bold';
         }
-        if (data.row.index === 9) {
+        if (data.row.index === 5) {
+          data.cell.styles.textColor = [180, 83, 9];
+        }
+      }
+    }
+  });
+  const leftFinalY = doc.lastAutoTable.finalY;
+
+  // Right Table: Monthly Franchisee Revenue & OPEX Sharing (13 rows, perfectly aligned)
+  doc.autoTable({
+    startY: tableY,
+    margin: { left: margin + colW + 6 },
+    tableWidth: colW,
+    head: [['MONTHLY FRANCHISEE REVENUE & OPEX', 'AMOUNT']],
+    body: [
+      ['Gross Box Office Revenue', pdfCurrency(d.ticketIncome)],
+      ['  - Less: Box Office Tax (18% + Show)', `-${pdfCurrency(d.boxOfficeTax)}`],
+      ['Net Box Office Share (' + d.investorSharePct + '%)', pdfCurrency(d.investorBoxOfficeShare)],
+      ['Gross F&B Concessions Revenue', pdfCurrency(d.foodIncome)],
+      ['  - Less: F&B Tax (5% GST Inclusive)', `-${pdfCurrency(d.foodTax)}`],
+      ['  - Less: F&B Cost (COGS ' + d.fnbCostPct + '%)', `-${pdfCurrency(d.fnbCostAmount)}`],
+      ['Net F&B Share (' + d.investorFnbSharePct + '%)', pdfCurrency(d.investorFnbMonthlyShare)],
+      ['Franchisee Gross Monthly Share', pdfCurrency(d.totalInvestorMonthly)],
+      ['Less: Electricity OPEX', `-${pdfCurrency(d.electricityCost)}`],
+      ['Less: Staff Salary OPEX', `-${pdfCurrency(d.salaryCost)}`],
+      ['Less: Misc & Sundry OPEX', `-${pdfCurrency(d.miscCost)}`],
+      ['Total Monthly OPEX Deductions', `-${pdfCurrency(d.totalExpenses)}`],
+      ['Franchisee Net Monthly Take-Home', pdfCurrency(d.investorNetMonthly)]
+    ],
+    theme: 'plain',
+    headStyles: {
+      fillColor: [36, 36, 48],
+      textColor: [255, 255, 255],
+      fontSize: 7.5,
+      fontStyle: 'bold',
+      cellPadding: 1.8
+    },
+    styles: {
+      fontSize: 7.1,
+      cellPadding: 1.5,
+      lineColor: [225, 225, 235],
+      lineWidth: 0.2,
+      minCellHeight: 4.6
+    },
+    columnStyles: {
+      0: { textColor: [30, 41, 59], cellWidth: 54 },
+      1: { halign: 'right', fontStyle: 'bold', textColor: cDark, cellWidth: 34 }
+    },
+    didParseCell: function(data) {
+      if (data.section === 'body') {
+        if (data.row.index === 0 || data.row.index === 3) {
+          data.cell.styles.fillColor = [245, 245, 250];
+          data.cell.styles.fontStyle = 'bold';
+        }
+        if (data.row.index === 1 || data.row.index === 4) {
+          data.cell.styles.textColor = [160, 60, 30];
+        }
+        if (data.row.index === 2) {
+          data.cell.styles.textColor = cAccentDark;
+          data.cell.styles.fontStyle = 'bold';
+        }
+        if (data.row.index === 5) {
+          data.cell.styles.textColor = cFnbDark;
+          data.cell.styles.fontStyle = 'bold';
+        }
+        if (data.row.index === 6) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+        if (data.row.index >= 7 && data.row.index <= 9) {
+          data.cell.styles.textColor = [120, 50, 50];
+        }
+        if (data.row.index === 10) {
+          data.cell.styles.textColor = cAccentDark;
+          data.cell.styles.fontStyle = 'bold';
+        }
+        if (data.row.index === 11) {
           data.cell.styles.fillColor = [240, 253, 244];
           data.cell.styles.textColor = [22, 101, 52];
           data.cell.styles.fontStyle = 'bold';
         }
-        if (data.row.index === 10) {
+        if (data.row.index === 12) {
           data.cell.styles.fillColor = [232, 249, 237];
           data.cell.styles.textColor = [18, 90, 46];
           data.cell.styles.fontStyle = 'bold';
@@ -609,14 +686,14 @@ function downloadPDF() {
       pdfCurrency(d.cumulative[0])
     ],
     [
-      'Year 2 (+8% Annual Growth)',
+      `Year 2 (+${d.yoyGrowth}% Annual Growth)`,
       pdfCurrency(d.yearlyShare[1]),
       pdfCurrency(depreciation[1]),
       pdfCurrency(d.yearlyShare[1] + depreciation[1]),
       pdfCurrency(d.cumulative[1])
     ],
     [
-      'Year 3 (+8% Annual Growth)',
+      `Year 3 (+${d.yoyGrowth}% Annual Growth)`,
       pdfCurrency(d.yearlyShare[2]),
       pdfCurrency(depreciation[2]),
       pdfCurrency(d.yearlyShare[2] + depreciation[2]),
@@ -628,7 +705,7 @@ function downloadPDF() {
     startY: trajStartY + 2,
     margin: { left: margin },
     tableWidth: contentWidth,
-    head: [['TIMELINE', 'FRANCHISEE NET SHARE (+8% YOY)', 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
+    head: [['TIMELINE', `FRANCHISEE NET SHARE (+${d.yoyGrowth}% YOY)`, 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
     body: trajRows,
     theme: 'plain',
     headStyles: {
@@ -689,9 +766,9 @@ function downloadPDF() {
 
   const highlights = [
     {
-      title: 'FRANCHISEE ANNUAL NET RETURN',
-      val: `${pdfCurrency(d.totalAnnualInvestorNet)} / Yr`,
-      sub: `${pdfCurrency(d.investorNetMonthly)} net / mo after ${pdfCurrency(d.totalExpenses)} OPEX`,
+      title: 'FRANCHISEE MONTHLY NET RETURN',
+      val: `${pdfCurrency(d.investorNetMonthly)} / Mo`,
+      sub: `After ${pdfCurrency(d.totalExpenses)} OPEX (${pdfCurrency(d.totalAnnualInvestorNet)} / Yr)`,
       bg: [240, 253, 244],
       border: [187, 247, 208],
       color: [20, 83, 45]
@@ -745,7 +822,7 @@ function downloadPDF() {
   const inputLines = rawNote.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.6);
+  doc.setFontSize(6.3);
 
   let allWrappedLines = [];
   inputLines.forEach(line => {
@@ -754,9 +831,9 @@ function downloadPDF() {
     allWrappedLines.push(...wrapped);
   });
 
-  const lineHeight = 3.9;
-  const titleHeight = 5.4;
-  const paddingY = 4.0;
+  const lineHeight = 3.4;
+  const titleHeight = 5.2;
+  const paddingY = 3.5;
   const calculatedH = titleHeight + (allWrappedLines.length * lineHeight) + paddingY;
   const footerY = pageHeight - 6.5;
   const footerLimit = footerY - 4.5;
@@ -774,12 +851,12 @@ function downloadPDF() {
   doc.text('* FOFO OPERATING & FINANCIAL MODEL DISCLOSURES & NOTES:', margin + 3.5, noteY + 4.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.6);
+  doc.setFontSize(6.3);
   doc.setTextColor(30, 41, 59);
 
-  let currentLineY = noteY + 8.8;
+  let currentLineY = noteY + 8.4;
   for (let i = 0; i < allWrappedLines.length; i++) {
-    if (currentLineY + 2.0 > noteY + noteH) break;
+    if (currentLineY + 1.8 > noteY + noteH) break;
     doc.text(allWrappedLines[i], margin + 3.5, currentLineY);
     currentLineY += lineHeight;
   }
@@ -799,7 +876,7 @@ function downloadPDF() {
 }
 
 // Event Listeners for Operating Inputs
-['seats', 'investment', 'weekdayShowsPerDay', 'weekendShowsPerDay', 'weekdayOccupancy', 'weekendOccupancy', 'weekdayRate', 'weekendRate', 'foodRate', 'electricityCost', 'salaryCost', 'miscCost'].forEach((id) => {
+ids.forEach((id) => {
   const el = $(id);
   if (el) el.addEventListener('input', update);
 });

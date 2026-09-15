@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <script src="jspdf.umd.min.js"></script>
+  <script src="jspdf.plugin.autotable.min.js"></script>
+  <script src="logo-data.js"></script>
+  <script src="seating.js"></script>
+</head>
+<body>
+  <div id="output">Testing...</div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        // Let us see how seating.js currently generates PDF
+        const { jsPDF } = window.jspdf;
+        // Call downloadPDF's internal generator or test it
+        // We will create a probe
+        document.getElementById('output').innerText = 'Ready to test';
+      } catch (e) {
+        document.getElementById('output').innerText = 'ERROR: ' + e.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html><head>
+  <script src="jspdf.umd.min.js"></script>
+  <script src="jspdf.plugin.autotable.min.js"></script>
+  <script src="logo-data.js"></script>
+</head>
+<body>
+  <div id="output">P1: 212.6 mm | P2: 155.2 mm | P3: 218.4 mm | Total Pages: 3</div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Palette
+        const cNavy = [21, 40, 64];
+        const cGold = [185, 148, 80];
+        const cDark = [24, 24, 33];
+        const cMuted = [113, 113, 126];
+        const cAccent = [240, 85, 55];
+        const cAccentDark = [201, 61, 37];
+        const cLine = [220, 220, 228];
+        const cCardBg = [250, 250, 252];
+        const cCardBorder = [228, 228, 235];
+        const cHighlightBg = [255, 244, 241];
+        const cHighlightBorder = [255, 217, 208];
+        const cTableHead = [36, 36, 48];
+        const cTableHeadNavy = [21, 40, 64];
+        const cTableLine = [225, 225, 235];
+
+        function drawPageFooter(pageNum, totalPages) {
+          const footY = pageHeight - 11;
+          doc.setDrawColor(...cNavy);
+          doc.setLineWidth(0.4);
+          doc.line(margin, footY - 2.5, pageWidth - margin, footY - 2.5);
+
+          doc.setDrawColor(...cGold);
+          doc.setLineWidth(0.2);
+          doc.line(margin, footY - 1.7, pageWidth - margin, footY - 1.7);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.0);
+          doc.setTextColor(...cMuted);
+          doc.text('The Obelisk, Opp. Shell Petrol Pump, Science City Road, Sola, Ahmedabad-380060. | Ph: +91 94276 47819 | info@sanelitecinemas.com', margin, footY + 2.5);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7.5);
+          doc.setTextColor(...cNavy);
+          doc.text('Page ' + pageNum + ' of ' + totalPages, pageWidth - margin, footY + 2.5, { align: 'right' });
+        }
+
+        function drawPageRunningHeader(pageNum, sectionTag) {
+          if (typeof SANELITE_LOGO !== 'undefined') {
+            doc.addImage(SANELITE_LOGO, 'PNG', margin, 7.5, 36, 7.73, undefined, 'FAST');
+          }
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7.2);
+          doc.setTextColor(...cNavy);
+          doc.text('Sanelite Cinemas LLP • Commercial MoU Term Sheet', margin, 18.5);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7.0);
+          doc.setTextColor(...cAccentDark);
+          doc.text(sectionTag, pageWidth - margin, 18.5, { align: 'right' });
+
+          doc.setDrawColor(...cLine);
+          doc.setLineWidth(0.3);
+          doc.line(margin, 20.5, pageWidth - margin, 20.5);
+        }
+
+        // ==========================================
+        // PAGE 1: Particulars, Tenure, Financials, Preamble
+        // ==========================================
+        // Logo
+        if (typeof SANELITE_LOGO !== 'undefined') {
+          doc.addImage(SANELITE_LOGO, 'PNG', margin, 10, 51.2, 11, undefined, 'FAST');
+        }
+        // Subtitle directly under logo as requested by user
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...cNavy);
+        doc.text('Sanelite Cinemas LLP • Commercial MoU Term Sheet', margin, 25.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...cMuted);
+        doc.text('Generated: 14 Sep 2026', pageWidth - margin, 16, { align: 'right' });
+
+        doc.setFillColor(255, 240, 236);
+        doc.setDrawColor(...cHighlightBorder);
+        doc.roundedRect(pageWidth - margin - 42, 19, 42, 5.5, 1, 1, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(...cAccentDark);
+        doc.text('COMMERCIAL MoU FRAMEWORK', pageWidth - margin - 21, 23, { align: 'center' });
+
+        doc.setDrawColor(...cLine);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 28, pageWidth - margin, 28);
+
+        // 3 KPI Cards
+        const cardY = 30.5;
+        const cardH = 18;
+        const cardW = (contentWidth - 8) / 3;
+        const cards = [
+          { title: 'ESTIMATED FITOUT CAPEX', val: 'Rs. 25.00 L*', sub: 'Rs. 2,500 / sq.ft • Premium Cinema', highlight: true },
+          { title: 'REVENUE SHARE RATIO', val: '25% / Month*', sub: 'Net Sales (Box Office + F&B)', highlight: false },
+          { title: 'AGREEMENT TENURE', val: '9 + 9 Years*', sub: 'Fit-out: 100 days • Lock-in: 9 Years', highlight: false }
+        ];
+        cards.forEach((card, idx) => {
+          const x = margin + (idx * (cardW + 4));
+          doc.setFillColor(...(card.highlight ? cHighlightBg : cCardBg));
+          doc.setDrawColor(...(card.highlight ? cHighlightBorder : cCardBorder));
+          doc.roundedRect(x, cardY, cardW, cardH, 1.5, 1.5, 'FD');
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(6.6);
+          doc.setTextColor(...(card.highlight ? cAccentDark : cMuted));
+          doc.text(card.title, x + 3.5, cardY + 4.8);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10.5);
+          doc.setTextColor(...(card.highlight ? cAccentDark : cDark));
+          doc.text(card.val, x + 3.5, cardY + 11.2);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6.2);
+          doc.setTextColor(...cMuted);
+          doc.text(card.sub, x + 3.5, cardY + 15.5);
+        });
+
+        // Parties Table
+        const colW = (contentWidth - 5) / 2;
+        doc.autoTable({
+          startY: 51.5,
+          margin: { left: margin },
+          tableWidth: colW,
+          head: [['1. PROPERTY OWNER / FRANCHISEE', 'PARTICULARS']],
+          body: [
+            ['Name of Owner', 'Mr. Rajesh Patel'],
+            ['Company / Entity', 'Patel Real Estate & Holdings Pvt. Ltd.'],
+            ['Registered Address', '402, Highline Corporate Park, Sindhu Bhavan Road, Bodakdev, Ahmedabad'],
+            ['PAN Number', 'ABCDE1234F'],
+            ['GSTIN Registration', '24ABCDE1234F1Z5']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.4 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 28 }, 1: { textColor: cDark } }
+        });
+        const p1End = doc.lastAutoTable.finalY;
+
+        doc.autoTable({
+          startY: 51.5,
+          margin: { left: margin + colW + 5 },
+          tableWidth: colW,
+          head: [['2. FRANCHISOR / CINEMA OPERATOR', 'PARTICULARS']],
+          body: [
+            ['Entity Name', 'SANELITE CINEMAS LLP'],
+            ['Authorized Signatory', 'Designated Partner / Authorised Rep.'],
+            ['Registered Office', 'The Obelisk, Opp. Shell Petrol Pump, Science City Road, Sola, Ahmedabad'],
+            ['Corporate Identification', 'LLPIN: ABR-1442 (Incorporated in Gujarat)'],
+            ['GSTIN Registration', '24AAVFS6422M1ZM']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHeadNavy, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.4 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 32 }, 1: { textColor: cDark } }
+        });
+        const p2End = doc.lastAutoTable.finalY;
+        const partEnd = Math.max(p1End, p2End) + 3;
+
+        // Property Specs
+        doc.autoTable({
+          startY: partEnd,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['3. PROPERTY SPECIFICATIONS & CURRENT HANDOVER STATUS', 'SITE DETAILS']],
+          body: [
+            ['Total Carpet Area Offered', '9,000 sq.ft (Demarcated cinema hall & foyer footprint)'],
+            ['Premises Commercial Location', 'Survey No. 124/2, Near Shell Petrol Pump, Science City Main Road, Sola, Ahmedabad'],
+            ['Prominent Road Frontage', '65 ft wide clear main-road frontage with prime signage rights'],
+            ['Building Type & Categorization', 'Commercial Building / Multiplex Mall'],
+            ['Current Physical Status', 'Ready to use — Clear bare-shell handed over for civil execution']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.4 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 }, 1: { textColor: cDark } }
+        });
+
+        // Tenure Terms
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 3,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['4. TRANSACTION TYPE & TENURE TERMS', 'COMMERCIAL SPECIFICATIONS']],
+          body: [
+            ['Fit-Out Construction Period', '100 days from bare-shell site handover & sanction clearances'],
+            ['Mandatory Lock-in Period', '9 Years (Both parties bound without premature unilateral exit)'],
+            ['Total Commercial Lease Tenure', '9 Years + 9 Years (Renewable with mutually agreed escalation terms)']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.4 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 }, 1: { textColor: cDark } }
+        });
+
+        // Financial Consideration
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 3,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['7. FINANCIAL CONSIDERATION & INVESTMENT SUMMARY', 'COMMERCIAL TERMS']],
+          body: [
+            ['7.1 Franchisee Fee per Screen', 'Rs. 2.50 Lacs / Screen + applicable GST'],
+            ['Total Franchisee Onboarding Fees', 'Rs. 7.50 Lacs + GST'],
+            ['7.2 Total Fitout Capex Cost', 'Rs. 25.00 Lacs + GST (Premium Cinema)'],
+            ['Initial Token Advance Payment', 'Rs. 15 Lacs (Payable upon formal execution of this MoU)'],
+            ['Balance Fitout Capex Disbursement', 'As per stage-wise construction milestones detailed in agreed Payment Annexure']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.4 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 }, 1: { textColor: cDark } },
+          didParseCell: function(data) {
+            if (data.section === 'body' && (data.row.index === 1 || data.row.index === 2)) {
+              data.cell.styles.fillColor = cHighlightBg;
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.textColor = cAccentDark;
+            }
+          }
+        });
+
+        // Preamble Callout Box
+        const preambleY = doc.lastAutoTable.finalY + 3;
+        doc.setFillColor(...cCardBg);
+        doc.setDrawColor(...cCardBorder);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, preambleY, contentWidth, 19, 1.5, 1.5, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(...cNavy);
+        doc.text('COMMERCIAL PREAMBLE & STATEMENT OF INTENT:', margin + 3.5, preambleY + 4.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(...cDark);
+        const preText = 'This Memorandum of Understanding (MoU) establishes the primary mutually agreed terms and commercial framework between Property Owner ("Franchisee") and Sanelite Cinemas LLP ("Franchisor") for establishing, outfitting, licensing, and managing a modern commercial multiplex theater at the above scheduled premises. Both Parties agree to execute definitive long-term lease and operating agreements based on the terms established herein.';
+        doc.text(doc.splitTextToSize(preText, contentWidth - 7), margin + 3.5, preambleY + 8.5);
+
+        const page1HeightUsed = preambleY + 19;
+
+        // ==========================================
+        // PAGE 2: Scope of Work Part A & Part B + Electrical Load
+        // ==========================================
+        doc.addPage();
+        drawPageRunningHeader(2, 'SECTION 5 & 6: SCOPE OF WORK & UTILITY ALLOCATION');
+
+        const defaultScopeOfWork = [
+          "Completion of all civil works as per final approved Cinema Drawings. (Walls and foyer tiles as per Cinema Requirement)",
+          "Construction of fully equipped Ladies’ & Gents’ Washrooms as per Cinema design. Detailed drawing will be shared once agreement is signed.",
+          "Basic tiles into cinema screen as per design.",
+          "Entry and Exit glass doors as per Cinema design and as per Building/Mall standard along with safety rollers ( in case required).",
+          "Complete flooring of best quality tiles or as per cinema 3D design.",
+          "Provision of Server Room/Electrical room, F&B Counter Walls, and other internal partitions as per layout.",
+          "Material lift to be provided for unloading of material at Cinema level.",
+          "Providing Cinema Branding Space including Entry signage (Lollipop), Ground floor branding, and Terrace signage and movie hording space with fabrication as per standard cinema requirement.",
+          "Box office at ground floor and cinema floor as per Design.",
+          "Provision for VSAT/ISP installation with NOC from other tenants if required.",
+          "Issuance of NOC for Cinema from Owner and other stakeholders",
+          "Obtaining statutory permissions and NOC from all the department and get Cinema License before opening of Cinema.",
+          "Provide DG set back up and stabilizer as per Cinema requirement.",
+          "AC outdoor units and utility space at suitable area or on terrace along with AC AHU/indoor/outdoor unit cabin and fabrication for ducting.",
+          "Dedicated lift is required for cinema floor if not then priority to be given to cinema viewers.",
+          "Property owner shall complete fire fighting system, sprinkler drops, alarms and smoke detectors along with panel and fire NOC for Cinema.",
+          "Documents required for ownership proof and due diligence BU Permission, Property Card, Fire NOCs, Floor & Parking Plan, 7/12 & 8-A Extracts, NA Order, and Ownership Proof.",
+          "10 kW (3-phase) power and water supply during fit-out."
+        ];
+
+        const civilItems = [
+          { num: '01', title: 'Civil Works & Foyer Walls:', text: defaultScopeOfWork[0] },
+          { num: '02', title: 'Restrooms & Sanitation:', text: defaultScopeOfWork[1] },
+          { num: '03', title: 'Auditorium Base Flooring:', text: defaultScopeOfWork[2] },
+          { num: '04', title: 'Access Doors & Safety Glazing:', text: defaultScopeOfWork[3] },
+          { num: '05', title: 'Foyer & Concession Tiles:', text: defaultScopeOfWork[4] },
+          { num: '06', title: 'Technical & Electrical Rooms:', text: defaultScopeOfWork[5] },
+          { num: '07', title: 'Logistics / Material Handling Lift:', text: defaultScopeOfWork[6] },
+          { num: '08', title: 'Facade, Terrace & Entry Signage:', text: defaultScopeOfWork[7] },
+          { num: '09', title: 'Box Office & Ticket Counters:', text: defaultScopeOfWork[8] }
+        ];
+
+        doc.autoTable({
+          startY: 23.5,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['#', '5. SCOPE OF WORK — PART A: CIVIL & ARCHITECTURAL REQUIREMENTS', 'RESPONSIBILITY']],
+          body: civilItems.map(it => [
+            it.num,
+            [{ text: it.title + ' ', fontStyle: 'bold' }, { text: it.text }],
+            'Property Owner'
+          ]),
+          theme: 'plain',
+          headStyles: { fillColor: cTableHeadNavy, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.5, cellPadding: 1.2, minCellHeight: 4.6, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: {
+            0: { fontStyle: 'bold', textColor: cAccentDark, cellWidth: 8, halign: 'center' },
+            1: { textColor: cDark, cellWidth: contentWidth - 32 },
+            2: { fontStyle: 'bold', textColor: [40, 45, 60], cellWidth: 24, halign: 'center' }
+          },
+          alternateRowStyles: { fillColor: [252, 253, 255] }
+        });
+
+        const utilItems = [
+          { num: '10', title: 'Satellite & ISP Uplink NOC:', text: defaultScopeOfWork[9] },
+          { num: '11', title: 'Comprehensive Landlord NOC:', text: defaultScopeOfWork[10] },
+          { num: '12', title: 'Building Permissions & Licenses:', text: defaultScopeOfWork[11] },
+          { num: '13', title: 'Diesel Generator Backup & Stabilizer:', text: defaultScopeOfWork[12] },
+          { num: '14', title: 'HVAC Outdoor Units & Shafts:', text: defaultScopeOfWork[13] },
+          { num: '15', title: 'Vertical Transit / Priority Lifts:', text: defaultScopeOfWork[14] },
+          { num: '16', title: 'Fire Life Safety, Sprinklers & NOC:', text: defaultScopeOfWork[15] },
+          { num: '17', title: 'Statutory Property Due Diligence:', text: defaultScopeOfWork[16] },
+          { num: '18', title: 'Construction Power & Water Utility:', text: defaultScopeOfWork[17] }
+        ];
+
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 3.5,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['#', '5. SCOPE OF WORK — PART B: UTILITIES, COMPLIANCE & BUILDING SERVICES', 'RESPONSIBILITY']],
+          body: utilItems.map(it => [
+            it.num,
+            [{ text: it.title + ' ', fontStyle: 'bold' }, { text: it.text }],
+            'Property Owner'
+          ]),
+          theme: 'plain',
+          headStyles: { fillColor: cTableHeadNavy, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.5, cellPadding: 1.2, minCellHeight: 4.6, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: {
+            0: { fontStyle: 'bold', textColor: cAccentDark, cellWidth: 8, halign: 'center' },
+            1: { textColor: cDark, cellWidth: contentWidth - 32 },
+            2: { fontStyle: 'bold', textColor: [40, 45, 60], cellWidth: 24, halign: 'center' }
+          },
+          alternateRowStyles: { fillColor: [252, 253, 255] }
+        });
+
+        // Section 6: Electrical Load
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 3.5,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['6. ELECTRICAL POWER & SUBSTATION ALLOCATION', 'SPECIFICATION DETAILS']],
+          body: [
+            ['Connected Dedicated Power Load', '50 kW sanctioned load provided to cinema electrical room'],
+            ['Substation & Metering Setup', 'Separate digital energy meter & LT panel provided at Property Owner capex'],
+            ['100% Full Operational DG Backup', 'DG power supply with automatic changeover switch for uninterrupted projection']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.2, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 }, 1: { textColor: cDark } }
+        });
+
+        const page2HeightUsed = doc.lastAutoTable.finalY;
+
+        // ==========================================
+        // PAGE 3: Revenue Share, Force Majeure, Statutory Governance & Dual Signatures
+        // ==========================================
+        doc.addPage();
+        drawPageRunningHeader(3, 'SECTION 7.3, 8 & 9: REVENUE SHARE, GOVERNANCE & EXECUTION');
+
+        // Section 7.3 Revenue Share
+        doc.autoTable({
+          startY: 23.5,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['7.3 COMMERCIAL REVENUE SHARE MECHANISM', 'PAYOUT BREAKDOWN']],
+          body: [
+            ['Franchisee / Property Owner Share', '25% of monthly consolidated Net Sales'],
+            ['Franchisor / Cinema Operator Share', '75% of monthly consolidated Net Sales'],
+            ['Payment Frequency & Reconciliation', 'Monthly payout disbursed within 7 business days following month-end close'],
+            ['Applicable Revenue Streams', 'Consolidated Net Box Office Ticket Sales + Net F&B (Food & Beverage) Revenues']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.6, cellPadding: 1.2, minCellHeight: 4.0, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 50 }, 1: { textColor: cDark } },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.row.index === 0) {
+              data.cell.styles.fillColor = cHighlightBg;
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.textColor = cAccentDark;
+            }
+          }
+        });
+
+        // Net Sales Definition Callout Box
+        const netSalesY = doc.lastAutoTable.finalY + 3.0;
+        doc.setFillColor(...cCardBg);
+        doc.setDrawColor(...cCardBorder);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, netSalesY, contentWidth, 14, 1.5, 1.5, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.7);
+        doc.setTextColor(...cNavy);
+        doc.text('DEFINITION OF NET SALES (AUDITED BASIS):', margin + 3.5, netSalesY + 4.2);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.3);
+        doc.setTextColor(...cDark);
+        const netSalesDef = 'Net Sales shall mean Gross Revenue generated from cinema ticket sales and Food & Beverage (F&B) counter receipts, excluding statutory Goods and Services Tax (GST) and local municipality entertainment duties. Revenue share shall be remitted directly to Property Owner\'s nominated bank account accompanied by MIS statement.';
+        doc.text(doc.splitTextToSize(netSalesDef, contentWidth - 7), margin + 3.5, netSalesY + 7.8);
+
+        // Section 8.a Force Majeure
+        const fmStartY = netSalesY + 17.0;
+        doc.autoTable({
+          startY: fmStartY,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['8.a COMPREHENSIVE FORCE MAJEURE FRAMEWORK — COLUMN A', '8.a COMPREHENSIVE FORCE MAJEURE FRAMEWORK — COLUMN B']],
+          body: [
+            ['• Acts of God (floods, earthquakes, severe storms, natural calamities)', '• Quarantine, localized lockdown, or administrative restrictions'],
+            ['• Pandemics, epidemics, or Covid-like public health crises', '• Governmental orders, statutory acts, or legislative prohibitions'],
+            ['• Accidents, structural emergencies, or major infrastructural failure', '• National or regional strikes, civil unrest, or widespread labor disputes'],
+            ['• Riots, civil commotion, or public disorder beyond reasonable control', '• Severe fire, industrial explosions, or utility facility collapse'],
+            ['• War, armed invasion, acts of foreign enemies, or military hostilities', '• Critical shortage or complete grid cutoff of energy, fuel, or water'],
+            ['• Terrorist hostilities, malicious sabotage, or national emergency', '• Unforeseen events beyond reasonable control of affected party']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHeadNavy, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.4, cellPadding: 1.1, minCellHeight: 3.8, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { textColor: cDark, cellWidth: contentWidth / 2 }, 1: { textColor: cDark, cellWidth: contentWidth / 2 } }
+        });
+
+        // Combined Default Indemnity & Notice Protocol Box
+        const calloutY = doc.lastAutoTable.finalY + 3.0;
+        doc.setFillColor(255, 246, 244);
+        doc.setDrawColor(...cHighlightBorder);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, calloutY, contentWidth, 18, 1.5, 1.5, 'FD');
+
+        doc.setFillColor(...cAccentDark);
+        doc.roundedRect(margin, calloutY, 2.5, 18, 0.6, 0.6, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.7);
+        doc.setTextColor(...cAccentDark);
+        doc.text('OPERATIONS INTERRUPTION, OWNER DEFAULT INDEMNITY & NOTICE PROTOCOL:', margin + 5, calloutY + 4.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.2);
+        doc.setTextColor(...cDark);
+        const combText = 'If cinema operations are disturbed or stopped due to Property Owner negligence, default or utility failure, Franchisor is not liable to pay revenue share for that month. The affected party shall promptly give written notice of any Force Majeure event; obligations resume immediately upon cessation.';
+        doc.text(doc.splitTextToSize(combText, contentWidth - 9), margin + 5, calloutY + 8.2);
+
+        // Section 8 Governance Table
+        const termsY = calloutY + 21.0;
+        doc.autoTable({
+          startY: termsY,
+          margin: { left: margin },
+          tableWidth: contentWidth,
+          head: [['8. OTHER STATUTORY TAXES, CHARGES & LEGAL GOVERNANCE', 'AGREED TERMS']],
+          body: [
+            ['b. Common Area Maintenance (CAM Charges)', 'Included in the Revenue share.'],
+            ['c. Municipal / Nagarpalika Taxes', 'To be paid by Property Owner / Franchisor.'],
+            ['d. Lease Agreement Registration Charges', 'To be borne equally by both parties (50% Property Owner / 50% Franchisor)'],
+            ['e. Dispute Resolution & Arbitration', 'Arbitrator mutually appointed from both parties; Venue / Seat: Ahmedabad'],
+            ['f. Legal Jurisdiction & Applicable Laws', 'Exclusive Jurisdiction of Courts in Ahmedabad, Gujarat, India']
+          ],
+          theme: 'plain',
+          headStyles: { fillColor: cTableHead, textColor: [255, 255, 255], fontSize: 6.8, fontStyle: 'bold', cellPadding: 1.3 },
+          styles: { fontSize: 6.5, cellPadding: 1.1, minCellHeight: 4.0, lineColor: cTableLine, lineWidth: 0.2 },
+          columnStyles: { 0: { fontStyle: 'bold', textColor: [50, 50, 65], cellWidth: 54 }, 1: { textColor: cDark } }
+        });
+
+        // Section 9 Dual Signatures
+        const sigStartY = doc.lastAutoTable.finalY + 4.0;
+        const sigColW = (contentWidth - 5) / 2;
+        const sigBoxH = 46;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.8);
+        doc.setTextColor(...cNavy);
+        doc.text('9. FORMAL EXECUTION & AUTHORIZED ATTESTATION', margin, sigStartY);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(...cMuted);
+        doc.text('IN WITNESS WHEREOF, the Parties hereto have executed this Memorandum of Understanding as of the date first written above.', margin, sigStartY + 3.8);
+
+        const sigBoxesY = sigStartY + 6.0;
+
+        // Box 1 (Owner)
+        doc.setFillColor(...cCardBg);
+        doc.setDrawColor(...cTableLine);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, sigBoxesY, sigColW, sigBoxH, 1.5, 1.5, 'FD');
+
+        doc.setFillColor(...cTableHead);
+        doc.roundedRect(margin, sigBoxesY, sigColW, 6, 1.5, 1.5, 'F');
+        doc.rect(margin, sigBoxesY + 4, sigColW, 2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(255, 255, 255);
+        doc.text('FOR PROPERTY OWNER / FRANCHISEE', margin + 3.5, sigBoxesY + 4.2);
+
+        doc.setDrawColor(...cTableLine);
+        doc.setLineWidth(0.2);
+        doc.line(margin + 5, sigBoxesY + 28, margin + sigColW - 5, sigBoxesY + 28);
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.0);
+        doc.setTextColor(...cMuted);
+        doc.text('(Authorized Signatory / Official Stamp)', margin + (sigColW / 2), sigBoxesY + 31.5, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(...cDark);
+        doc.text('Name: ', margin + 5, sigBoxesY + 36.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Mr. Rajesh Patel', margin + 18, sigBoxesY + 36.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Title: ', margin + 5, sigBoxesY + 40.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Property Owner / Franchisee', margin + 18, sigBoxesY + 40.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Date: ', margin + 5, sigBoxesY + 44.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('14 September 2026', margin + 18, sigBoxesY + 44.5);
+
+        // Box 2 (Franchisor)
+        const c2X = margin + sigColW + 5;
+        doc.setFillColor(...cCardBg);
+        doc.setDrawColor(...cTableLine);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(c2X, sigBoxesY, sigColW, sigBoxH, 1.5, 1.5, 'FD');
+
+        doc.setFillColor(...cTableHeadNavy);
+        doc.roundedRect(c2X, sigBoxesY, sigColW, 6, 1.5, 1.5, 'F');
+        doc.rect(c2X, sigBoxesY + 4, sigColW, 2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(255, 255, 255);
+        doc.text('FOR SANELITE CINEMAS LLP (FRANCHISOR)', c2X + 3.5, sigBoxesY + 4.2);
+
+        doc.setDrawColor(...cTableLine);
+        doc.setLineWidth(0.2);
+        doc.line(c2X + 5, sigBoxesY + 28, c2X + sigColW - 5, sigBoxesY + 28);
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.0);
+        doc.setTextColor(...cMuted);
+        doc.text('(Authorized Signatory / Official Stamp)', c2X + (sigColW / 2), sigBoxesY + 31.5, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(...cDark);
+        doc.text('Name: ', c2X + 5, sigBoxesY + 36.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Sanelite Cinemas LLP', c2X + 18, sigBoxesY + 36.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Title: ', c2X + 5, sigBoxesY + 40.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Partner / Authorized Representative', c2X + 18, sigBoxesY + 40.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Date: ', c2X + 5, sigBoxesY + 44.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('14 September 2026', c2X + 18, sigBoxesY + 44.5);
+
+        const page3HeightUsed = sigBoxesY + sigBoxH;
+
+        // Footers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          drawPageFooter(i, totalPages);
+        }
+
+        document.getElementById('output').innerText = 
+          'P1: ' + page1HeightUsed.toFixed(1) + ' mm | ' +
+          'P2: ' + page2HeightUsed.toFixed(1) + ' mm | ' +
+          'P3: ' + page3HeightUsed.toFixed(1) + ' mm | ' +
+          'Total Pages: ' + totalPages;
+      } catch (e) {
+        document.getElementById('output').innerText = 'ERROR: ' + e.message + ' ' + e.stack;
+      }
+    });
+  </script>
+
+
+</body></html>

@@ -1,4 +1,4 @@
-const defaults = { seats: 210, weekdayShowsPerDay: 2, weekendShowsPerDay: 4, foodRate: 80, weekdayOccupancy: 35, weekendOccupancy: 45, weekdayRate: 200, weekendRate: 250, investorShare: 25, investment: 22500000 };
+const defaults = { seats: 250, weekdayShowsPerDay: 4, weekendShowsPerDay: 5, foodRate: 80, weekdayOccupancy: 25, weekendOccupancy: 45, weekdayRate: 200, weekendRate: 250, investorShare: 25, yoyGrowth: 5, investment: 22500000 };
 const ids = Object.keys(defaults);
 const $ = (id) => document.getElementById(id);
 const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
@@ -8,12 +8,26 @@ const shortCurrency = (value) => {
   if (abs >= 100000) return `₹${(value / 100000).toFixed(2)} L`;
   return currency.format(value);
 };
-const number = (id) => Number($(id).value) || 0;
+const number = (id) => Number($(id) ? $(id).value : 0) || 0;
+
+let isNoteUserModified = false;
+
+function generateDefaultNote(d) {
+  const growth = (d && d.yoyGrowth !== undefined) ? d.yoyGrowth : 5;
+  return [
+    '• Under the FOCO model, the Franchisee shall receive Net Box Office Ticket Revenue and Net Food & Beverage Revenue generated from the Cinema.',
+    '• All day-to-day operational expenses (OPEX) of the Cinema shall be borne and paid by the Franchisor.',
+    '• The Franchisor shall bear all charges payable towards movie producers/distributors, movie content and applicable screen charges.',
+    `• For financial projections, the Cinema shall be considered to achieve ${growth}% year-on-year growth in admissions during Year 2 and Year 3.`,
+    '• For financial and tax modelling purposes, the Cinema assets shall be considered to depreciate at 10% per annum on a reducing-balance basis, subject to applicable tax laws.',
+    '• The above growth and depreciation assumptions are for financial projection purposes only and shall not be construed as a guarantee of revenue, admissions, profitability or tax benefits by the Franchisor.'
+  ].join('\n');
+}
 
 function model() {
   const seats = number('seats');
-  const weekdayShowsPerDay = number('weekdayShowsPerDay') || 2;
-  const weekendShowsPerDay = number('weekendShowsPerDay') || 4;
+  const weekdayShowsPerDay = number('weekdayShowsPerDay') || 4;
+  const weekendShowsPerDay = number('weekendShowsPerDay') || 5;
   const totalWeekdayShows = weekdayShowsPerDay * 18;
   const totalWeekendShows = weekendShowsPerDay * 12;
   const totalShows = totalWeekdayShows + totalWeekendShows;
@@ -27,19 +41,29 @@ function model() {
   const ticketIncome = weekdayRevenue + weekendRevenue;
   const gstTicket = ticketIncome * 18 / 118;
   const showTax = totalShows * 25;
+  const boxOfficeTax = gstTicket + showTax;
+  const netTicket = ticketIncome - boxOfficeTax;
+
   const foodIncome = (weekdayBookings + weekendBookings) * number('foodRate');
   const foodTax = foodIncome * 5 / 105;
+  const netFood = foodIncome - foodTax;
+  const netFoodAvailable = netFood;
+
   const totalIncome = ticketIncome + foodIncome;
-  const taxes = gstTicket + showTax + foodTax;
-  const available = totalIncome - taxes;
-  const monthlyShare = available * number('investorShare') / 100;
+  const taxes = boxOfficeTax + foodTax;
+  const available = netTicket + netFoodAvailable;
+  const investorSharePct = $('investorShare') ? number('investorShare') : 25;
+  const monthlyShare = available * investorSharePct / 100;
   const annualShare = monthlyShare * 12;
   const investment = number('investment');
   const depreciation = [investment * .1, investment * .09, investment * .081];
-  const yearlyShare = [annualShare, annualShare * 1.08, annualShare * 1.08 * 1.08];
+
+  const yoyGrowth = $('yoyGrowth') ? number('yoyGrowth') : 5;
+  const growthMult = 1 + (yoyGrowth / 100);
+  const yearlyShare = [annualShare, annualShare * growthMult, annualShare * growthMult * growthMult];
   const cumulative = [];
   yearlyShare.reduce((sum, amount, i) => { const total = sum + amount + depreciation[i]; cumulative.push(total); return total; }, 0);
-  return { seats, weekdayShowsPerDay, weekendShowsPerDay, totalWeekdayShows, totalWeekendShows, totalShows, totalWeekdaySeats, totalWeekendSeats, totalMonthlySeats, weekdayBookings, weekendBookings, weekdayRevenue, weekendRevenue, ticketIncome, foodIncome, taxes, totalIncome, available, monthlyShare, annualShare, investment, yearlyShare, cumulative };
+  return { seats, weekdayShowsPerDay, weekendShowsPerDay, totalWeekdayShows, totalWeekendShows, totalShows, totalWeekdaySeats, totalWeekendSeats, totalMonthlySeats, weekdayBookings, weekendBookings, weekdayRevenue, weekendRevenue, ticketIncome, gstTicket, showTax, boxOfficeTax, netTicket, foodIncome, foodTax, netFood, fnbCostPct: 0, fnbCostAmount: 0, netFoodAvailable, taxes, totalIncome, available, investorSharePct, monthlyShare, annualShare, investment, yoyGrowth, yearlyShare, cumulative };
 }
 function update() {
   const d = model();
@@ -52,21 +76,30 @@ function update() {
     $('weekendOccupancyValue').textContent = `${number('weekendOccupancy')}%`;
   }
   if ($('investorShareValue')) {
-    $('investorShareValue').value = `${number('investorShare')}%`;
-    $('investorShareValue').textContent = `${number('investorShare')}%`;
+    $('investorShareValue').value = `${d.investorSharePct}%`;
+    $('investorShareValue').textContent = `${d.investorSharePct}%`;
+  }
+  if ($('yoyGrowthValue')) {
+    $('yoyGrowthValue').value = `${d.yoyGrowth}%`;
+    $('yoyGrowthValue').textContent = `${d.yoyGrowth}%`;
+  }
+  if ($('growthPill')) {
+    $('growthPill').textContent = `${d.yoyGrowth}% annual growth`;
   }
   $('investmentHero').textContent = shortCurrency(d.investment);
   $('monthlyShare').textContent = shortCurrency(d.monthlyShare);
   $('annualShareNote').textContent = `${shortCurrency(d.annualShare)} annually`;
   $('totalIncome').textContent = shortCurrency(d.totalIncome);
-  $('yearOneYield').textContent = d.investment ? `${(d.annualShare / d.investment * 100).toFixed(1)}%` : '—';
-  $('yearOneValue').textContent = `${shortCurrency(d.annualShare)} before depreciation`;
+  if ($('yearOneYield')) $('yearOneYield').textContent = d.investment ? `${(d.annualShare / d.investment * 100).toFixed(1)}%` : '—';
+  if ($('yearOneValue')) $('yearOneValue').textContent = `${shortCurrency(d.annualShare)} before depreciation`;
   $('threeYearReturn').textContent = shortCurrency(d.cumulative[2]);
   $('threeYearPercent').textContent = d.investment ? `${(d.cumulative[2] / d.investment * 100).toFixed(1)}% of initial investment` : '—';
   $('grossRevenue').textContent = shortCurrency(d.totalIncome);
   $('ticketRevenue').textContent = shortCurrency(d.ticketIncome);
   $('foodRevenue').textContent = shortCurrency(d.foodIncome);
-  $('taxRevenue').textContent = shortCurrency(d.taxes);
+  if ($('boxOfficeTaxDisplay')) $('boxOfficeTaxDisplay').textContent = `-${shortCurrency(d.boxOfficeTax)}`;
+  if ($('fnbTaxDisplay')) $('fnbTaxDisplay').textContent = `-${shortCurrency(d.foodTax)}`;
+  $('taxRevenue').textContent = `-${shortCurrency(d.taxes)}`;
   $('availableForSharing').textContent = shortCurrency(d.available);
   const totalForDonut = d.totalIncome || 1;
   const ticketEnd = d.ticketIncome / totalForDonut * 100;
@@ -87,6 +120,11 @@ function update() {
   [['barOne', 'barOneValue', 0], ['barTwo', 'barTwoValue', 1], ['barThree', 'barThreeValue', 2]].forEach(([bar, value, i]) => { $(bar).style.height = `${Math.max(8, d.cumulative[i] / max * 142)}px`; $(value).textContent = shortCurrency(d.cumulative[i]); });
   const payback = d.annualShare ? d.investment / d.annualShare : 0;
   $('payback').textContent = payback ? `Payback in ${payback.toFixed(1)} years` : 'Payback unavailable';
+
+  // FOCO Disclosures Note (Sync with defaults if user hasn't typed custom notes)
+  if ($('focoNotesText') && !isNoteUserModified) {
+    $('focoNotesText').value = generateDefaultNote(d);
+  }
 }
 
 function downloadPDF() {
@@ -170,18 +208,18 @@ function downloadPDF() {
   doc.text('FRANCHISE INTELLIGENCE', pageWidth - margin - 18.5, 24, { align: 'center' });
 
   doc.setDrawColor(220, 220, 228);
-  doc.setLineWidth(0.4);
-  doc.line(margin, 29.5, pageWidth - margin, 29.5);
+  doc.setLineWidth(0.3);
+  doc.line(margin, 28, pageWidth - margin, 28);
 
-  // 4 Top KPI Cards
-  const cardY = 33.5;
-  const cardH = 23;
-  const gap = 3.5;
-  const cardW = (contentWidth - (gap * 3)) / 4;
+  // 3 Top KPI Cards (Height 22mm, spacious and aligned)
+  const cardY = 31;
+  const cardH = 22;
+  const gap = 4;
+  const cardW = (contentWidth - (gap * 2)) / 3; // 58mm each
 
   const cards = [
     {
-      title: 'MONTHLY INVESTOR SHARE',
+      title: 'MONTHLY FRANCHISE SHARE',
       val: pdfCurrencyWithStar(d.monthlyShare),
       sub: `${pdfCurrency(d.annualShare)} annually`,
       highlight: true
@@ -190,12 +228,6 @@ function downloadPDF() {
       title: 'INITIAL INVESTMENT',
       val: pdfCurrencyWithStar(d.investment),
       sub: `Base setup (${d.seats} seats)`,
-      highlight: false
-    },
-    {
-      title: 'YEAR 1 CASH YIELD',
-      val: d.investment ? `${(d.annualShare / d.investment * 100).toFixed(1)}*%` : '—',
-      sub: 'Before depreciation',
       highlight: false
     },
     {
@@ -219,26 +251,26 @@ function downloadPDF() {
     doc.roundedRect(x, cardY, cardW, cardH, 2, 2, 'FD');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
+    doc.setFontSize(6.8);
     doc.setTextColor(...(card.highlight ? cAccentDark : cMuted));
-    doc.text(card.title, x + 3.5, cardY + 6.5);
+    doc.text(card.title, x + 4, cardY + 6.0);
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
+    doc.setFontSize(12.2);
     doc.setTextColor(...(card.highlight ? cAccentDark : cDark));
-    doc.text(card.val, x + 3.5, cardY + 14);
+    doc.text(card.val, x + 4, cardY + 13.5);
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
+    doc.setFontSize(6.6);
     doc.setTextColor(...cMuted);
-    doc.text(card.sub, x + 3.5, cardY + 19);
+    doc.text(card.sub, x + 4, cardY + 18.5);
   });
 
-  // 1. Side-by-side Tables: Assumptions & Monthly Breakdown
-  const tableY = 56;
-  const colW = (contentWidth - 6) / 2;
+  // 1. Side-by-side Tables: Assumptions & Monthly Breakdown (11 rows each, zero overlap)
+  const tableY = 57;
+  const colW = (contentWidth - 6) / 2; // 88mm each
 
-  // Left Table: Assumptions (Clean 8 balanced rows)
+  // Left Table: Assumptions (10 balanced rows matching Right Table)
   doc.autoTable({
     startY: tableY,
     margin: { left: margin },
@@ -246,85 +278,110 @@ function downloadPDF() {
     head: [['OPERATING ASSUMPTIONS', 'VALUE']],
     body: [
       ['Total Seat Capacity', `${d.seats} Seats`],
-      ['Shows / Day (Mon-Thu / Fri-Sun)', `${d.weekdayShowsPerDay} Shows / ${d.weekendShowsPerDay} Shows`],
-      ['Weekday Occupancy (Mon-Thu)', `${number('weekdayOccupancy')}%`],
-      ['Weekend Occupancy (Fri-Sun)', `${number('weekendOccupancy')}%`],
-      ['Ticket Price (Mon-Thu / Fri-Sun)', `Rs. ${number('weekdayRate')} / Rs. ${number('weekendRate')}`],
+      ['Shows / Day (Wkday / Wkend)', `${d.weekdayShowsPerDay} / ${d.weekendShowsPerDay} Shows`],
+      ['Occupancy (Wkday / Wkend)', `${number('weekdayOccupancy')}% / ${number('weekendOccupancy')}%`],
+      ['Ticket Price (Wkday / Wkend)', `Rs. ${number('weekdayRate')} / Rs. ${number('weekendRate')}`],
       ['F&B Spend / Booking', `Rs. ${number('foodRate')}`],
-      ['Investor Profit Share', `${number('investorShare')}%`],
-      ['Total Monthly Shows', `${d.totalShows} Shows (${d.totalWeekdayShows} Mon-Thu / ${d.totalWeekendShows} Fri-Sun)`]
+      ['Initial Setup Investment', pdfCurrency(d.investment)],
+      ['Box Office Tax (18% + Show)', `-${pdfCurrency(d.boxOfficeTax)}`],
+      ['F&B Tax (5% GST Inclusive)', `-${pdfCurrency(d.foodTax)}`],
+      ['Monthly Franchise Share', `${number('investorShare')}%`],
+      ['YoY Admissions Growth', `${d.yoyGrowth}% / Year`]
     ],
     theme: 'plain',
     headStyles: {
       fillColor: [36, 36, 48],
       textColor: [255, 255, 255],
-      fontSize: 7.5,
+      fontSize: 7.4,
       fontStyle: 'bold',
-      cellPadding: 2.5
+      cellPadding: 1.8
     },
     styles: {
-      fontSize: 7.5,
-      cellPadding: 2.1,
-      lineColor: [235, 235, 240],
+      fontSize: 7.1,
+      cellPadding: 1.5,
+      minCellHeight: 4.6,
+      lineColor: [225, 225, 235],
       lineWidth: 0.2
     },
     columnStyles: {
-      0: { textColor: [60, 60, 72] },
+      0: { textColor: [50, 50, 65] },
       1: { halign: 'right', fontStyle: 'bold', textColor: cDark }
+    },
+    didParseCell: function(data) {
+      if (data.section === 'body') {
+        if (data.row.index === 6 || data.row.index === 7) {
+          data.cell.styles.textColor = [160, 60, 30];
+        }
+        if (data.row.index === 8) {
+          data.cell.styles.textColor = cAccentDark;
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
     }
   });
   const leftFinalY = doc.lastAutoTable.finalY;
 
-  // Right Table: Financial Breakdown (Matching 8 balanced rows)
+  // Right Table: Financial Breakdown (10 balanced rows matching Left Table)
   doc.autoTable({
     startY: tableY,
     margin: { left: margin + colW + 6 },
     tableWidth: colW,
     head: [['MONTHLY FINANCIAL BREAKDOWN', 'AMOUNT']],
     body: [
-      ['Box Office Revenue', pdfCurrency(d.ticketIncome)],
+      ['Box Office Revenue (Gross)', pdfCurrency(d.ticketIncome)],
       ['Food & Beverage (F&B) Revenue', pdfCurrency(d.foodIncome)],
       ['Gross Total Monthly Income', pdfCurrency(d.totalIncome)],
-      ['Taxes (18% GST, 5% F&B, Show Tax)', `-${pdfCurrency(d.taxes)}`],
+      ['Less: Box Office Tax (18% + Show)', `-${pdfCurrency(d.boxOfficeTax)}`],
+      ['Less: F&B Tax (5% GST Inclusive)', `-${pdfCurrency(d.foodTax)}`],
+      ['Total Statutory Taxes Deducted', `-${pdfCurrency(d.taxes)}`],
       ['Net Distributable Income', pdfCurrency(d.available)],
-      ['Monthly Investor Share', pdfCurrency(d.monthlyShare)],
-      ['Annual Investor Share', pdfCurrency(d.annualShare)],
+      ['Monthly Franchise Share (' + d.investorSharePct + '%)', pdfCurrency(d.monthlyShare)],
+      ['Annual Franchise Share', pdfCurrency(d.annualShare)],
       ['Estimated Payback Horizon', d.annualShare ? `${(d.investment / d.annualShare).toFixed(1)} Years` : '—']
     ],
     theme: 'plain',
     headStyles: {
       fillColor: [36, 36, 48],
       textColor: [255, 255, 255],
-      fontSize: 7.5,
+      fontSize: 7.4,
       fontStyle: 'bold',
-      cellPadding: 2.5
+      cellPadding: 1.8
     },
     styles: {
-      fontSize: 7.5,
-      cellPadding: 2.1,
-      lineColor: [235, 235, 240],
+      fontSize: 7.1,
+      cellPadding: 1.5,
+      minCellHeight: 4.6,
+      lineColor: [225, 225, 235],
       lineWidth: 0.2
     },
     columnStyles: {
-      0: { textColor: [60, 60, 72] },
+      0: { textColor: [50, 50, 65] },
       1: { halign: 'right', fontStyle: 'bold', textColor: cDark }
     },
     didParseCell: function(data) {
       if (data.section === 'body') {
-        if (data.row.index === 2 || data.row.index === 4) {
+        if (data.row.index === 2 || data.row.index === 5) {
           data.cell.styles.fillColor = [245, 245, 250];
+          data.cell.styles.fontStyle = 'bold';
         }
-        if (data.row.index === 5 || data.row.index === 6) {
+        if (data.row.index === 3 || data.row.index === 4) {
+          data.cell.styles.textColor = [160, 60, 30];
+        }
+        if (data.row.index === 5) {
+          data.cell.styles.textColor = [160, 60, 30];
+        }
+        if (data.row.index === 6 || data.row.index === 7) {
           data.cell.styles.fillColor = cHighlightBg;
           data.cell.styles.textColor = cAccentDark;
+          data.cell.styles.fontStyle = 'bold';
         }
       }
     }
   });
   const rightFinalY = doc.lastAutoTable.finalY;
 
-  // 2. Full-Width Ticketing Capacity & Footfall Table
-  const capY = Math.max(leftFinalY, rightFinalY) + 5;
+  // 2. Full-Width Ticketing Capacity & Footfall Table (Clean spacing)
+  const capY = Math.max(leftFinalY, rightFinalY) + 4.5;
 
   doc.autoTable({
     startY: capY,
@@ -340,14 +397,15 @@ function downloadPDF() {
     headStyles: {
       fillColor: [48, 48, 62],
       textColor: [255, 255, 255],
-      fontSize: 7.5,
+      fontSize: 7.2,
       fontStyle: 'bold',
-      cellPadding: 2.5
+      cellPadding: 1.8
     },
     styles: {
-      fontSize: 7.5,
-      cellPadding: 2.2,
-      lineColor: [230, 230, 238],
+      fontSize: 7.1,
+      cellPadding: 1.5,
+      minCellHeight: 4.6,
+      lineColor: [225, 225, 235],
       lineWidth: 0.2
     },
     columnStyles: {
@@ -369,8 +427,8 @@ function downloadPDF() {
   });
   const capFinalY = doc.lastAutoTable.finalY;
 
-  // 3. Three-Year Trajectory Table
-  const trajY = capFinalY + 5;
+  // 3. Three-Year Trajectory Table (Clean spacing)
+  const trajY = capFinalY + 4.5;
   const depreciation = [d.investment * 0.1, d.investment * 0.09, d.investment * 0.081];
   const trajRows = [
     [
@@ -381,14 +439,14 @@ function downloadPDF() {
       pdfCurrency(d.cumulative[0])
     ],
     [
-      'Year 2 (+8% Annual Growth)',
+      `Year 2 (+${d.yoyGrowth}% Annual Growth)`,
       pdfCurrency(d.yearlyShare[1]),
       pdfCurrency(depreciation[1]),
       pdfCurrency(d.yearlyShare[1] + depreciation[1]),
       pdfCurrency(d.cumulative[1])
     ],
     [
-      'Year 3 (+8% Annual Growth)',
+      `Year 3 (+${d.yoyGrowth}% Annual Growth)`,
       pdfCurrency(d.yearlyShare[2]),
       pdfCurrency(depreciation[2]),
       pdfCurrency(d.yearlyShare[2] + depreciation[2]),
@@ -400,20 +458,21 @@ function downloadPDF() {
     startY: trajY,
     margin: { left: margin },
     tableWidth: contentWidth,
-    head: [['TIMELINE', 'INVESTOR SHARE (8% GROWTH)', 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
+    head: [['TIMELINE', `FRANCHISE SHARE (${d.yoyGrowth}% GROWTH)`, 'DEPRECIATION (10%)', 'YEARLY TOTAL', 'CUMULATIVE RETURN']],
     body: trajRows,
     theme: 'plain',
     headStyles: {
       fillColor: cDark,
       textColor: [255, 255, 255],
-      fontSize: 7.5,
+      fontSize: 7.2,
       fontStyle: 'bold',
-      cellPadding: 2.5
+      cellPadding: 1.8
     },
     styles: {
-      fontSize: 7.5,
-      cellPadding: 2.2,
-      lineColor: [230, 230, 238],
+      fontSize: 7.1,
+      cellPadding: 1.5,
+      minCellHeight: 4.6,
+      lineColor: [225, 225, 235],
       lineWidth: 0.2
     },
     columnStyles: {
@@ -430,63 +489,115 @@ function downloadPDF() {
   const trajFinalY = doc.lastAutoTable.finalY;
 
   // 4. Payback summary banner
-  const finalY2 = trajFinalY + 3.5;
+  const bannerY = trajFinalY + 3.5;
+  const bannerH = 7.5;
   doc.setFillColor(243, 240, 255);
   doc.setDrawColor(223, 216, 250);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, finalY2, contentWidth, 7.5, 1.5, 1.5, 'FD');
+  doc.roundedRect(margin, bannerY, contentWidth, bannerH, 1.5, 1.5, 'FD');
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(85, 52, 196);
-  doc.text('Capital Recovery Timeline:', margin + 4, finalY2 + 5);
+  doc.text('Capital Recovery Timeline:', margin + 4, bannerY + 5);
 
   const paybackYears = d.annualShare ? (d.investment / d.annualShare).toFixed(1) : '—';
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.text(`Estimated Full Payback in ${paybackYears} Years (at current assumptions)`, pageWidth - margin - 4, finalY2 + 5, { align: 'right' });
+  doc.text(`Estimated Full Payback in ${paybackYears} Years (at current assumptions)`, pageWidth - margin - 4, bannerY + 5, { align: 'right' });
 
-  // 5. Disclaimer Note Box
-  const noteY = finalY2 + 10.5;
+  // 5. FOCO Operating & Financial Disclosures Box (Editable)
+  const noteY = bannerY + bannerH + 3.5;
+  const rawNote = ($('focoNotesText') && $('focoNotesText').value.trim())
+    ? $('focoNotesText').value.trim()
+    : generateDefaultNote(d);
+
+  const inputLines = rawNote.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.3);
+
+  let allWrappedLines = [];
+  inputLines.forEach(line => {
+    const cleanLine = line.replace(/₹/g, 'Rs. ');
+    const wrapped = doc.splitTextToSize(cleanLine, contentWidth - 7);
+    allWrappedLines.push(...wrapped);
+  });
+
+  const lineHeight = 3.4;
+  const titleHeight = 5.2;
+  const paddingY = 3.5;
+  const calculatedH = titleHeight + (allWrappedLines.length * lineHeight) + paddingY;
+  const footerY = pageHeight - 6.5;
+  const footerLimit = footerY - 4.5;
+  const maxAllowedH = Math.max(18, footerLimit - noteY);
+  const noteH = Math.min(Math.max(calculatedH, 18), maxAllowedH);
+
   doc.setFillColor(254, 250, 245);
   doc.setDrawColor(245, 222, 195);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, noteY, contentWidth, 13, 1.5, 1.5, 'FD');
+  doc.roundedRect(margin, noteY, contentWidth, noteH, 1.5, 1.5, 'FD');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(190, 80, 25);
-  doc.text('* Note:', margin + 3.5, noteY + 4.5);
+  doc.setFontSize(7.4);
+  doc.setTextColor(194, 65, 12);
+  doc.text('* FOCO OPERATING & FINANCIAL MODEL DISCLOSURES & NOTES:', margin + 3.5, noteY + 4.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor(85, 85, 95);
-  const noteLines = [
-    'All financial projections, cash yields, and returns shown above are estimates based on standard operating assumptions',
-    '(occupancy, ticket pricing, and F&B spends) as per the franchise investment workbook. Actual performance may vary',
-    'based on local market conditions, seasonality, government policies, and day-to-day operational efficiencies.'
-  ];
-  noteLines.forEach((line, lineIdx) => {
-    doc.text(line, margin + 14, noteY + 4.5 + (lineIdx * 3.3));
-  });
+  doc.setFontSize(6.3);
+  doc.setTextColor(30, 41, 59);
 
-  // Footer
-  const footerY = pageHeight - 9;
+  let currentLineY = noteY + 8.4;
+  for (let i = 0; i < allWrappedLines.length; i++) {
+    if (currentLineY + 1.8 > noteY + noteH) break;
+    doc.text(allWrappedLines[i], margin + 3.5, currentLineY);
+    currentLineY += lineHeight;
+  }
+
+  // Footer (Crisp bottom position)
   doc.setDrawColor(225, 225, 232);
   doc.setLineWidth(0.3);
   doc.line(margin, footerY - 2.5, pageWidth - margin, footerY - 2.5);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
+  doc.setFontSize(6.8);
   doc.setTextColor(...cMuted);
-  doc.text('Generated via Sanelite Cinemas Franchise Intelligence Engine', margin, footerY);
-  doc.text('Confidential & Proprietary — For Investor Assessment Only', pageWidth - margin, footerY, { align: 'right' });
+  doc.text('Generated via Sanelite Cinemas Franchise Intelligence Engine (FOCO Model)', margin, footerY);
+  doc.text('Page 1 of 1 · Confidential & Proprietary — For Franchise Partner Assessment Only', pageWidth - margin, footerY, { align: 'right' });
 
   doc.save('sanelite-cinemas-roi-summary.pdf');
 }
 
 ids.forEach((id) => $(id).addEventListener('input', update));
-$('resetButton').addEventListener('click', () => { ids.forEach((id) => { $(id).value = defaults[id]; }); update(); });
+
+// Editable FOCO Disclosures Note Listeners
+if ($('focoNotesText')) {
+  $('focoNotesText').addEventListener('input', () => {
+    isNoteUserModified = true;
+    if ($('noteStatusNotice')) {
+      $('noteStatusNotice').textContent = 'Customized for PDF';
+    }
+  });
+}
+
+if ($('resetNoteBtn')) {
+  $('resetNoteBtn').addEventListener('click', () => {
+    isNoteUserModified = false;
+    const d = model();
+    if ($('focoNotesText')) $('focoNotesText').value = generateDefaultNote(d);
+    if ($('noteStatusNotice')) {
+      $('noteStatusNotice').textContent = 'Default note restored';
+      setTimeout(() => { if ($('noteStatusNotice')) $('noteStatusNotice').textContent = ''; }, 2200);
+    }
+  });
+}
+
+$('resetButton').addEventListener('click', () => {
+  ids.forEach((id) => { $(id).value = defaults[id]; });
+  isNoteUserModified = false;
+  if ($('noteStatusNotice')) $('noteStatusNotice').textContent = '';
+  update();
+});
 $('exportButton').addEventListener('click', () => {
   downloadPDF();
   $('toast').textContent = 'PDF downloaded';
