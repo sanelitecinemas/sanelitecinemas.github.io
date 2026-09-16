@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101018" />
+    <title>Sanelite Cinemas — MoU / Term Sheet & Seating Proposal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      if (!sessionStorage.getItem('sanelite_auth')) {
+        window.location.replace('login.html');
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Desktop Sidebar Navigation (Unified 3 Models) -->
+      <aside class="sidebar">
+        <a class="brand" href="index.html" aria-label="Sanelite Cinemas home">
+          <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="brand-logo" />
+        </a>
+        <nav aria-label="Primary navigation">
+          <a class="nav-link" href="index.html">
+            <span>📊 FOCO model</span>
+          </a>
+          <a class="nav-link" href="fofo-model.html">
+            <span>🎬 FOFO model</span>
+          </a>
+          <a class="nav-link active" href="seating-proposal.html">
+            <span>📜 MoU (Sq.ft Wise)</span>
+            <span class="sidebar-nav-badge">Live</span>
+          </a>
+          <a class="nav-link" href="seating-wise-mou.html">
+            <span>💺 MoU (Seating Wise)</span>
+          </a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="status-dot"></span>Official Sanelite Term Sheet Engine
+        </div>
+      </aside>
+
+      <!-- Mobile App Header (Visible on mobile & tablet <= 1024px) -->
+      <header class="mobile-header">
+        <div class="mobile-header-left">
+          <button id="mobileMenuBtn" class="mobile-menu-trigger" aria-label="Open navigation menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <a class="mobile-brand" href="index.html" aria-label="Sanelite Cinemas home">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="mobile-brand-logo" />
+          </a>
+        </div>
+        <div class="mobile-header-right">
+          <button class="mobile-btn mobile-btn-export" id="mobileExportButton">
+            <span>Export PDF</span>
+            <span aria-hidden="true">↓</span>
+          </button>
+          <button class="mobile-btn mobile-btn-logout" id="mobileLogoutButton" aria-label="Logout" title="Logout">
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Mobile Navigation Drawer Backdrop -->
+      <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+      <!-- Slide-out Mobile Navigation Drawer -->
+      <nav id="mobileDrawer" class="mobile-drawer" aria-label="Mobile navigation">
+        <div class="drawer-header">
+          <a class="drawer-brand" href="index.html">
+            <img src="cinemas-white-logo.png" onerror="this.onerror=null;this.src='logo-white.png';" alt="Sanelite Cinemas" class="drawer-logo" />
+          </a>
+          <button id="closeDrawerBtn" class="drawer-close-btn" aria-label="Close navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="drawer-links">
+          <a class="drawer-link" href="index.html">
+            <span class="drawer-link-icon">📊</span>
+            <div class="drawer-link-text">
+              <strong>FOCO Model</strong>
+              <small>Company operated franchise model</small>
+            </div>
+          </a>
+          <a class="drawer-link" href="fofo-model.html">
+            <span class="drawer-link-icon">🎬</span>
+            <div class="drawer-link-text">
+              <strong>FOFO Model</strong>
+              <small>Franchisee revenue & OPEX sharing</small>
+            </div>
+          </a>
+          <a class="drawer-link active" href="seating-proposal.html">
+            <span class="drawer-link-icon">📜</span>
+            <div class="drawer-link-text">
+              <strong>MoU (Sq.ft Wise)</strong>
+              <small>Carpet area based fitout calculation</small>
+            </div>
+            <span class="drawer-badge-live">Live</span>
+          </a>
+          <a class="drawer-link" href="seating-wise-mou.html">
+            <span class="drawer-link-icon">💺</span>
+            <div class="drawer-link-text">
+              <strong>MoU (Seating Wise)</strong>
+              <small>Screen-wise seating proposal & costing</small>
+            </div>
+          </a>
+        </div>
+
+        <div class="drawer-footer">
+          <div class="drawer-note">
+            <span class="status-dot"></span>Official Sanelite Term Sheet Engine
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main id="top">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Franchise Commercials & Legal Framework</p>
+            <h1>MoU / Term Sheet & Seating Proposal</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="button button-quiet" id="exportButton">Export MoU PDF <span aria-hidden="true">↓</span></button>
+            <button class="button button-quiet" id="resetProposalBtn">Reset defaults</button>
+            <button class="button button-logout" id="logoutButton">Logout <span aria-hidden="true">↗</span></button>
+          </div>
+        </header>
+
+        <!-- Hero Section with Ambient Glow -->
+        <section class="hero" id="overview">
+          <div class="hero-projector-beam" aria-hidden="true"></div>
+          <div class="hero-reel-watermark" aria-hidden="true">
+            <img src="sanelite-reel.png" alt="" class="reel-watermark-img" />
+          </div>
+
+          <div class="hero-content">
+            <h2>Term Sheet & Fitout: Tailor every screen & agreement clause.</h2>
+            <p>Enter client details, select cinema specification (Premium vs Ultra Luxurious), and specify carpet area. All data automatically synchronizes into the attached full official MoU Term Sheet below.</p>
+          </div>
+
+          <!-- Glassmorphic Fitout Total Hero Card -->
+          <div class="hero-investment glass-card">
+            <div class="glass-card-glow" aria-hidden="true"></div>
+            <div class="glass-card-tag">Civil & Interior Fitout Cost</div>
+            <strong id="heroGrandTotal">₹2.70 Cr</strong>
+            <small id="heroFitoutAndSeats">9,000 sq.ft × ₹3,000/sq.ft (Premium)</small>
+          </div>
+        </section>
+
+
+        <!-- ============================================================ -->
+        <!-- SECTION 1: CINEMA TYPE & FITOUT COSTING (AS IS)              -->
+        <!-- ============================================================ -->
+        <section class="panel" id="fitoutSection" style="margin-bottom: 24px;">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">SECTION 1</p>
+              <h3>Cinema Type & Fitout Costing</h3>
+            </div>
+            <span class="pill neutral">Civil & Interior Fitout</span>
+          </div>
+
+          <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px 0;">
+            Choose the cinema interior and architectural fitout specification. Base fitout is calculated directly as <strong>Carpet Area × Rate per sq.ft</strong>:
+          </p>
+
+          <!-- Interactive Cinema Type Cards (2 Options) -->
+          <div class="cinema-type-grid">
+            <div class="cinema-type-card active" id="typeCardPremium" data-type="premium" data-rate="3000">
+              <div class="cinema-type-header">
+                <span class="cinema-type-title">💎 Premium Cinema</span>
+                <span class="cinema-rate-edit-badge">
+                  <span class="rate-currency">₹</span>
+                  <input id="ratePremiumInput" class="rate-sqft-input" type="number" value="3000" min="500" step="50" />
+                  <span class="rate-unit">/ sq.ft</span>
+                </span>
+              </div>
+              <p class="cinema-type-desc">
+                High-performance acoustic wall panelling, premium carpet flooring, standard ambient auditorium lighting, and optimized projection throw setup.
+              </p>
+            </div>
+
+            <div class="cinema-type-card" id="typeCardUltra" data-type="ultra" data-rate="3500">
+              <div class="cinema-type-header">
+                <span class="cinema-type-title">👑 Ultra Luxurious Cinema</span>
+                <span class="cinema-rate-edit-badge">
+                  <span class="rate-currency">₹</span>
+                  <input id="rateUltraInput" class="rate-sqft-input" type="number" value="3500" min="500" step="50" />
+                  <span class="rate-unit">/ sq.ft</span>
+                </span>
+              </div>
+              <p class="cinema-type-desc">
+                Bespoke Gold-Class acoustic fabric treatments, custom designer wooden finishes, architectural mood lighting, luxury lounge ambiance, and VIP foyer finishes.
+              </p>
+            </div>
+          </div>
+
+          <div class="fitout-calculator-card">
+            <div class="fitout-input-group">
+              <label for="carpetAreaInput">Carpet Area (sq. ft.)</label>
+              <input id="carpetAreaInput" type="number" min="500" step="100" value="9000" />
+            </div>
+
+            <div class="fitout-cost-display">
+              <span>Civil & Interior Fitout Cost</span>
+              <strong id="dispFitoutCost">₹2,70,00,000</strong>
+              <small id="dispFitoutFormula">9,000 sq.ft × ₹3,000/sq.ft (Premium)</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- ATTACHED FULL DOCUMENT PREVIEW (LIVE SYNCHRONIZED)           -->
+        <!-- ============================================================ -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 32px 0 18px 0; flex-wrap: wrap; gap: 12px;">
+          <span class="mou-highlight-pill">
+            <span>✨</span>
+            <span><strong>Attached Official Document Preview:</strong> Real-time synchronized with Carpet Area, Screen Count, and Proposal parameters above. You can customize any term or scope item before exporting.</span>
+          </span>
+          <span id="saveNotice" style="font-size: 12px; color: #15803d; font-weight: 700;"></span>
+        </div>
+
+        <!-- PAGE 1 SECTION: Header, Property Owner, Franchisor, Property Details -->
+        <section class="mou-panel" id="mouDocPage1">
+          <div class="mou-doc-header" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <span class="mou-doc-badge">Official Agreement Document</span>
+            <h2 style="text-align: center; max-width: 100%; width: 100%; margin: 0 auto 6px auto;">Memorandum of Understanding (MoU) / Term Sheet</h2>
+            <p style="text-align: center; max-width: 100%; width: 100%; margin: 0 auto;">Bilateral Agreement Between Sanelite Cinemas LLP (Franchisor) & Property Owner (Franchisee)</p>
+          </div>
+
+          <!-- Interactive Agreement Date Picker Control Bar -->
+          <div class="mou-date-bar" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fff9f7 0%, #fff4f1 100%); border: 1.5px solid #ffd9d0; border-radius: 12px; padding: 14px 20px; margin: 18px 0 24px 0; box-shadow: 0 4px 12px rgba(232, 80, 50, 0.05); flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #fff; border: 1px solid #ffd9d0; display: grid; place-items: center; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                📅
+              </div>
+              <div>
+                <span style="font-size: 11px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; color: #e85032;">Agreement Date</span>
+                <strong id="dispDateFormatted" style="display: block; font-size: 15px; color: #181822; font-weight: 750; margin-top: 1px;">15 September 2026</strong>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label for="mouDatePicker" style="font-size: 12.5px; font-weight: 700; color: #4e4e5a;">Select Date:</label>
+              <input type="date" id="mouDatePicker" class="mou-date-picker-input" style="background: #fff; border: 1.5px solid #e85032; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; font-weight: 600; color: #181822; cursor: pointer; outline: none; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-family: inherit;" />
+              <button type="button" id="todayDateBtn" class="button button-quiet" style="font-size: 12px; font-weight: 700; color: #e85032; border: 1px solid #ffd9d0; padding: 7px 14px; cursor: pointer; border-radius: 8px;">Today</button>
+            </div>
+          </div>
+
+          <!-- Section 1: Property Owner / Franchisee Details -->
+          <div class="mou-section-heading">
+            <span class="mou-sec-title">1. Property Owner / Franchisee Details (Second Party):</span>
+          </div>
+          <div class="mou-grid">
+            <div class="mou-field">
+              <label for="ownerName">👤 Name of Property Owner:</label>
+              <input type="text" id="ownerName" class="mou-input-yellow" value="" placeholder="Property Owner Name" />
+            </div>
+            <div class="mou-field">
+              <label for="ownerCompany">🏢 Company Name (if any):</label>
+              <input type="text" id="ownerCompany" class="mou-input-yellow" value="" placeholder="Company Name" />
+            </div>
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label for="ownerAddress">📍 Full Postal Address:</label>
+              <input type="text" id="ownerAddress" class="mou-input-yellow" value="" placeholder="Full Postal Address" />
+            </div>
+            <div class="mou-field">
+              <label for="ownerPan">🪪 PAN Number:</label>
+              <input type="text" id="ownerPan" class="mou-input-yellow" value="" placeholder="PAN Number" style="text-transform: uppercase;" />
+            </div>
+            <div class="mou-field">
+              <label for="ownerGst">🧾 GSTIN Number:</label>
+              <input type="text" id="ownerGst" class="mou-input-yellow" value="" placeholder="GST Number" style="text-transform: uppercase;" />
+            </div>
+          </div>
+
+          <!-- Section 2: Franchisor Details (Sanelite Cinemas LLP) -->
+          <div class="mou-section-heading" style="margin-top: 32px;">
+            <span class="mou-sec-title">2. Franchisor Details (First Party):</span>
+          </div>
+          <div class="mou-franchisor-card">
+            <div class="mou-franchisor-badge">
+              <span>🔒 Verified Official Corporate Entity</span>
+            </div>
+            <div class="mou-grid">
+              <div class="mou-field">
+                <label>Company Name:</label>
+                <div class="readonly-val"><strong>Sanelite Cinemas LLP</strong></div>
+              </div>
+              <div class="mou-field">
+                <label>PAN Number:</label>
+                <div class="readonly-val">AEWFS5463H</div>
+              </div>
+              <div class="mou-field" style="grid-column: 1 / -1;">
+                <label>Corporate Head Office Address:</label>
+                <div class="readonly-val">3rd floor, The Obelisk, Opp. Shell Petrol Pump, Science City Road, Sola, Ahmedabad-380060</div>
+              </div>
+              <div class="mou-field">
+                <label>GST Number:</label>
+                <div class="readonly-val">24AEWFS5463H1ZF</div>
+              </div>
+              <div class="mou-field">
+                <label>Authorized Contact:</label>
+                <div class="readonly-val">+91 94276 47819 | info@sanelitecinemas.com</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Property Details -->
+          <div class="mou-section-heading" style="margin-top: 28px;">
+            <span class="mou-sec-title">3. Property Details:</span>
+          </div>
+          <div class="mou-grid">
+            <div class="mou-field">
+              <label for="purposeOfUse">🎬 Purpose of Use:</label>
+              <input type="text" id="purposeOfUse" class="mou-input-yellow" value="Miniplex / Multiplex / Cinema / Entertainment" placeholder="Miniplex / Multiplex / Cinema / Entertainment" list="purposeOptions" />
+              <datalist id="purposeOptions">
+                <option value="Miniplex / Multiplex / Cinema / Entertainment"></option>
+                <option value="Multiplex"></option>
+                <option value="Miniplex"></option>
+                <option value="Cinema"></option>
+                <option value="Entertainment"></option>
+              </datalist>
+            </div>
+            <div class="mou-field">
+              <label for="carpetArea">📐 Carpet Area (Synced with Section 1):</label>
+              <input type="text" id="carpetArea" class="mou-input-yellow" value="9,000 sq.ft" placeholder="e.g. 9,000 sq.ft" />
+            </div>
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label for="propertyAddress">📍 Address of Property:</label>
+              <input type="text" id="propertyAddress" class="mou-input-yellow" value="Survey No. 124/2, Near Shell Petrol Pump, Science City Main Road, Sola, Ahmedabad" placeholder="Property Address" />
+            </div>
+            <div class="mou-field">
+              <label for="frontage">🛣️ Road Frontage:</label>
+              <input type="text" id="frontage" class="mou-input-yellow" value="65 ft wide clear main-road frontage" placeholder="e.g. 60 ft Frontage" />
+            </div>
+            <div class="mou-field">
+              <label for="buildingType">🏢 Type Of Building:</label>
+              <input type="text" id="buildingType" class="mou-input-yellow" value="Commercial Building / Mall" placeholder="Commercial Building / Mall" />
+            </div>
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label for="propertyStatus">🏗️ Property Handover Status:</label>
+              <input type="text" id="propertyStatus" class="mou-input-yellow" value="Ready to use" placeholder="Ready to use or Under Construction" />
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 2 SECTION: Agreement Type, Scope of Work, Electrical Load, Financials -->
+        <section class="mou-panel" id="mouDocPage2">
+          <!-- Section 4: Agreement & Transaction Type -->
+          <div class="mou-section-heading">
+            <span class="mou-sec-title">4. Agreement & Transaction Type:</span>
+          </div>
+          <div class="mou-grid">
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label>📜 Type of Agreement:</label>
+              <div class="readonly-val">Memorandum of Understanding (to be followed by Lease Agreement / Registered Lease Deed)</div>
+            </div>
+            <div class="mou-field">
+              <label for="fitoutPeriod">⏱️ Fit-Out Period:</label>
+              <input type="text" id="fitoutPeriod" class="mou-input-yellow" value="100 days" placeholder="e.g. 90/100/120 days" />
+              <small style="color: var(--muted); font-size: 11px;">From completion of civil work & scope defined for the Property Owner</small>
+            </div>
+            <div class="mou-field">
+              <label for="lockinPeriod">🔒 Lock-in Period:</label>
+              <input type="text" id="lockinPeriod" class="mou-input-yellow" value="9 Years" placeholder="e.g. 9 Years" />
+            </div>
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label for="totalTenure">📅 Total Lease Tenure:</label>
+              <input type="text" id="totalTenure" class="mou-input-yellow" value="9 Years + 9 Years" placeholder="9 Years + 9 Years" />
+            </div>
+          </div>
+
+          <!-- Section 5: Scope of Work by Property Owner / Franchisee (Fully Editable) -->
+          <div class="mou-section-heading" style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span class="mou-sec-title">5. Scope of Work by Property Owner / Franchisee:</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+            <p class="mou-subtext" style="margin: 0;"><strong>The Property Owner shall be responsible for completing:</strong></p>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="addScopeBtn" class="btn-scope-action btn-accent">
+                <span>+</span> Add Scope Item
+              </button>
+              <button type="button" id="resetScopeBtn" class="btn-scope-action">
+                Reset to Default (18 Items)
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Interactive Scope of Work List -->
+          <div id="scopeOfWorkContainer" class="mou-scope-container"></div>
+
+          <!-- Section 6: Electrical Load -->
+          <div class="mou-section-heading" style="margin-top: 32px;">
+            <span class="mou-sec-title">6. Electrical Load Specification:</span>
+          </div>
+          <div class="mou-spec-card">
+            <span style="font-size: 15px;">⚡</span>
+            <span style="font-size: 13.5px; color: #1e293b; font-weight: 600;">Property Owner shall provide</span>
+            <input type="text" id="electricalLoad" class="mou-input-inline-yellow" style="width: 85px; text-align: center;" value="50 kW" placeholder="50 kW" />
+            <span style="font-size: 13.5px; color: #1e293b;">electrical load up to the Theatre Electrical Room with stabilizer (as per cinema load) to Electrical Panel.</span>
+          </div>
+
+          <!-- Section 7: Financials (7.1, 7.2) -->
+          <div class="mou-section-heading" style="margin-top: 32px;">
+            <span class="mou-sec-title">7. Financials:</span>
+          </div>
+
+          <!-- 7.1 Franchisee Fees -->
+          <div class="mou-card-box">
+            <h4>7.1 Franchisee Fees :</h4>
+            <div class="mou-grid three-col">
+              <div class="mou-field">
+                <label for="feePerScreen">Rate per Screen:</label>
+                <input type="text" id="feePerScreen" class="mou-input-yellow" value="2.5 lacs/Screen + GST" placeholder="2.5 lacs/Screen + GST" />
+              </div>
+              <div class="mou-field">
+                <label for="screenCount">Number of Screens (Synced):</label>
+                <input type="number" id="screenCount" min="1" max="24" class="mou-input-yellow" value="3" placeholder="3" />
+              </div>
+              <div class="mou-field">
+                <label for="totalFranchiseeFees">Total Franchisee Fees :</label>
+                <input type="text" id="totalFranchiseeFees" class="mou-input-yellow" value="₹7.5 Lacs + GST" placeholder="₹7.5 Lacs + GST" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 7.2 Capex & Payment Plan -->
+          <div class="mou-card-box">
+            <h4>7.2 Capex (Synced with Section 1 Fitout Cost):</h4>
+            <div class="mou-grid">
+              <div class="mou-field">
+                <label for="capexAmount">Total Civil & Interior Capex:</label>
+                <input type="text" id="capexAmount" class="mou-input-yellow" value="₹2,70,00,000 + GST" placeholder="₹2,70,00,000 + GST" />
+              </div>
+              <div class="mou-field">
+                <label for="tokenAmount">Payment Plan — Token Amount :</label>
+                <input type="text" id="tokenAmount" class="mou-input-yellow" value="15 lacs." placeholder="15 lacs." />
+              </div>
+            </div>
+            <p style="margin: 12px 0 0 0; font-size: 13px; color: #475569; font-weight: 550;">
+              • Balance Payment as per mutually agreed Payment Annexure.
+            </p>
+          </div>
+        </section>
+
+        <!-- PAGE 3 SECTION: 7.3 Revenue Share, 8. Other Terms, Force Majeure, CAM, Signatures -->
+        <section class="mou-panel" id="mouDocPage3">
+          <!-- Financial Timelines condition -->
+          <p class="mou-subtext" style="background: #f8fafc; padding: 14px 18px; border-left: 4px solid #b3924c; border-radius: 6px; font-size: 13px; line-height: 1.6; margin-bottom: 24px; color: #334155;">
+            The above amount shall be paid by the Property Owner (Franchisee) to Sanelite Cinemas LLP (Franchisor) as per the mutually agreed payment plan to enable completion of cinema making within committed timelines.
+          </p>
+
+          <!-- 7.3 Revenue Share -->
+          <div class="mou-section-heading">
+            <span class="mou-sec-title">7.3 Revenue Share:</span>
+          </div>
+          <div class="mou-card-box">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+              <span style="font-size: 14px; font-weight: 700; color: #152840;">• Revenue Share Percentage:</span>
+              <input type="number" id="revenueSharePct" class="mou-input-inline-yellow" style="width: 75px; text-align: center;" value="25" min="1" max="100" />
+              <span style="font-size: 14px; color: #1e293b;">% (<strong id="dispRevenueWords" style="color: #b3924c;">Twenty Five</strong>) of Monthly Net sales (Box office and Concessions) plus applicable GST</span>
+            </div>
+            <ul class="mou-list" style="margin-bottom: 12px;">
+              <li>GST invoice to be raised every month.</li>
+            </ul>
+            <ul class="mou-list dash-list">
+              <li>The sales figures of any month shall be shared on or before 10th of every succeeding month.</li>
+            </ul>
+            <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.5;">
+              The term <strong>"Net sales"</strong> shall mean the sales price (MRP) and other receipts from sales transactions less all discounts, the redemption value of promotional gift vouchers, and complementary passes given by Owner.
+            </p>
+          </div>
+
+          <!-- Section 8: Other Terms (Editable Force Majeure & Governance) -->
+          <div class="mou-section-heading">
+            <span class="mou-sec-title">8. Other Terms & Protections:</span>
+          </div>
+
+          <!-- 8.a Force Majeure (Editable) -->
+          <div style="margin-bottom: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <label for="forceMajeureText" style="font-size: 13px; font-weight: 750; color: #152840;">
+                a. Force Majeure (Comprehensive Editable Protections):
+              </label>
+              <button type="button" id="resetFmBtn" class="btn-scope-action">
+                Reset Force Majeure
+              </button>
+            </div>
+            <textarea id="forceMajeureText" class="mou-textarea" rows="12"></textarea>
+          </div>
+
+          <!-- Commercial & Legal Terms Grid (Editable) -->
+          <div class="mou-grid" style="margin-bottom: 26px;">
+            <div class="mou-field">
+              <label for="camCharges">b. CAM Charges:</label>
+              <input type="text" id="camCharges" class="mou-input-yellow" value="Included in the Revenue share." placeholder="e.g. Included in Revenue share" />
+            </div>
+            <div class="mou-field">
+              <label for="municipalTax">c. Municipal / Nagarpalika Tax:</label>
+              <input type="text" id="municipalTax" class="mou-input-yellow" value="To be paid by Property Owner/Franchisor." placeholder="e.g. To be paid by Owner" />
+            </div>
+            <div class="mou-field">
+              <label for="registrationCharges">d. Registration Charges:</label>
+              <input type="text" id="registrationCharges" class="mou-input-yellow" value="To be borne equally by both parties" placeholder="e.g. Borne equally" />
+            </div>
+            <div class="mou-field">
+              <label for="disputeResolution">e. Dispute Resolution & Arbitration:</label>
+              <input type="text" id="disputeResolution" class="mou-input-yellow" value="Arbitrator from both parties; Location – Ahmedabad" placeholder="Arbitration Terms" />
+            </div>
+            <div class="mou-field" style="grid-column: 1 / -1;">
+              <label for="legalJurisdiction">f. Legal Jurisdiction:</label>
+              <input type="text" id="legalJurisdiction" class="mou-input-yellow" value="Ahmedabad Courts" placeholder="Courts Jurisdiction" />
+            </div>
+          </div>
+
+          <!-- Section 9: Execution & Formal Signatures -->
+          <div class="mou-section-heading">
+            <span class="mou-sec-title">9. Authorized Signatures:</span>
+          </div>
+
+          <table class="mou-sig-table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">For Property Owner / Franchisee (Second Party)</th>
+                <th style="width: 50%;">For Sanelite Cinemas LLP (Franchisor)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="mou-sig-box" id="sigOwnerBox" role="button" tabindex="0" title="Click to upload signature from PC">
+                    <input type="file" id="sigOwnerFile" accept="image/*" style="display: none;" />
+                    <div class="mou-sig-placeholder" id="sigOwnerPlaceholder">
+                      <span class="mou-sig-icon">✍️</span>
+                      <span class="mou-sig-add-text">Add Sign</span>
+                      <span class="mou-sig-hint">(Click to upload from PC)</span>
+                    </div>
+                    <div class="mou-sig-preview-wrap" id="sigOwnerPreviewWrap" style="display: none;">
+                      <img id="sigOwnerPreviewImg" class="mou-sig-img" alt="Property Owner Signature" />
+                      <div class="mou-sig-details">
+                        <span class="mou-sig-filename" id="sigOwnerFileName">signature.png</span>
+                        <div class="mou-sig-actions">
+                          <button type="button" class="mou-sig-change-btn" id="sigOwnerChangeBtn">Change</button>
+                          <button type="button" class="mou-sig-remove-btn" id="sigOwnerRemoveBtn">✕ Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mou-field" style="margin-bottom: 10px;">
+                    <label for="sigOwnerName">Signatory Name:</label>
+                    <input type="text" id="sigOwnerName" class="mou-input-yellow" value="" placeholder="Owner Name" />
+                  </div>
+                  <div class="mou-field">
+                    <label for="sigOwnerDate">Signing Date:</label>
+                    <input type="text" id="sigOwnerDate" class="mou-input-yellow" value="11 July 2026" placeholder="DD Month YYYY" />
+                  </div>
+                </td>
+                <td>
+                  <div class="mou-sig-box" id="sigFranchisorBox" role="button" tabindex="0" title="Click to upload signature from PC">
+                    <input type="file" id="sigFranchisorFile" accept="image/*" style="display: none;" />
+                    <div class="mou-sig-placeholder" id="sigFranchisorPlaceholder">
+                      <span class="mou-sig-icon">✍️</span>
+                      <span class="mou-sig-add-text">Add Sign</span>
+                      <span class="mou-sig-hint">(Click to upload from PC)</span>
+                    </div>
+                    <div class="mou-sig-preview-wrap" id="sigFranchisorPreviewWrap" style="display: none;">
+                      <img id="sigFranchisorPreviewImg" class="mou-sig-img" alt="Franchisor Signature" />
+                      <div class="mou-sig-details">
+                        <span class="mou-sig-filename" id="sigFranchisorFileName">signature.png</span>
+                        <div class="mou-sig-actions">
+                          <button type="button" class="mou-sig-change-btn" id="sigFranchisorChangeBtn">Change</button>
+                          <button type="button" class="mou-sig-remove-btn" id="sigFranchisorRemoveBtn">✕ Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mou-field" style="margin-bottom: 10px;">
+                    <label for="sigFranchisorName">Signatory Name:</label>
+                    <input type="text" id="sigFranchisorName" class="mou-input-yellow" value="Sanelite Cinemas LLP (Authorized Signatory)" placeholder="Signatory Name" />
+                  </div>
+                  <div class="mou-field">
+                    <label for="sigFranchisorDate">Signing Date:</label>
+                    <input type="text" id="sigFranchisorDate" class="mou-input-yellow" value="11 July 2026" placeholder="DD Month YYYY" />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Official Document Footer Matching PDF -->
+          <div class="mou-official-footer-bar">
+            <div class="addr">
+              <span>🏢</span> 3rd floor, The Obelisk, Opp. Shell Petrol Pump, Science City Road, Sola, Ahmedabad-380060.
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar -->
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+            <button class="button button-quiet" id="secondaryResetBtn" type="button">Reset defaults</button>
+            <button class="button button-primary" id="mainExportButton" type="button" style="padding: 14px 28px; font-size: 14.5px; font-weight: 750;">
+              Export Official MoU Term Sheet PDF <span aria-hidden="true">↓</span>
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <!-- Mobile Bottom Tab Navigation -->
+      <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Model switcher">
+        <a href="index.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">📊</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOCO</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+        <a href="fofo-model.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">🎬</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">FOFO</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+        <a href="seating-proposal.html" class="bottom-nav-item active" aria-current="page">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">📜</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">Sq.ft MoU</span>
+            <span class="bottom-nav-tag">LIVE</span>
+          </div>
+        </a>
+        <a href="seating-wise-mou.html" class="bottom-nav-item">
+          <span class="bottom-nav-indicator" aria-hidden="true"></span>
+          <span class="bottom-nav-icon">💺</span>
+          <div class="bottom-nav-content">
+            <span class="bottom-nav-label">Seats MoU</span>
+            <span class="bottom-nav-tag">Switch</span>
+          </div>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="status">MoU Term Sheet PDF Downloaded</div>
+
+    <!-- Scripts -->
+    <script src="jspdf.umd.min.js"></script>
+    <script src="jspdf.plugin.autotable.min.js"></script>
+    <script src="logo-data.js"></script>
+    <script src="seating.js"></script>
+  </body>
+</html>
